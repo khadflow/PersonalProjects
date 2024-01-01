@@ -15,6 +15,7 @@ MonoImporter:
   - ExtendedSummation: {fileID: 2024269770038562643, guid: 45d8411ab778da54dab8aa4236490bb0, type: 3}
   - VectorLeft: {fileID: 7132434877189537764, guid: 53f4b3220a8e66648934d3f3a57c9d14, type: 3}
   - VectorRight: {fileID: 3866489585236169680, guid: 6b85a316e91193440bbffff1f52d0028, type: 3}
+  - Clk: {fileID: 2778127902144690485, guid: 8d135678c7f8e004bb28ea18efcd4720, type: 3}
   - _punchParticleSystem: {fileID: 1503233750786573640, guid: 6243db67bb325c443b747f6375ca1954, type: 3}
   - _kickParticleSystem: {fileID: 1503233750786573640, guid: e2269f15e5408574fb359fe3eb3d4505, type: 3}
   executionOrder: 0

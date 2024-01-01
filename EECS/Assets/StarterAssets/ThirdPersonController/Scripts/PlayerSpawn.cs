@@ -8,6 +8,9 @@ namespace StarterAssets
     public class PlayerSpawn : MonoBehaviour
     {
         public bool ActiveGame;
+
+        public GameObject[] characters;
+        private int selectedCharacter = 0;
         public GameObject _mainCamera;
         public GameObject Player;
         public GameObject Player2;
@@ -81,6 +84,9 @@ namespace StarterAssets
         public void CharacterSelect()
         {
             // TODO
+            /*characters[selectedCharacter].SetActive(false);
+            selectedCharacter = (selectedCharacter + 1) % characters.Length;
+            characters[selectedCharacter].SetActive(true);*/
         }
 
         public void ActivateGame()

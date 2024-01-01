@@ -1186,7 +1186,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: ab5b3c58725ea704baa9490bdd5da9ae, type: 3}
+  m_Motion: {fileID: -203655887218126122, guid: 1c4f1514af9f5e14793076d42035c384, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -3356,7 +3356,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Heavy Weapon Swing
-  m_Speed: 2
+  m_Speed: 2.5
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -7646321460434528321}
@@ -3369,7 +3369,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: c3e91e6d6b621214bb93d92110b12e80, type: 3}
+  m_Motion: {fileID: -203655887218126122, guid: 85758258c65eb514996b2d333d4847e6, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -4253,7 +4253,7 @@ AnimatorStateMachine:
     m_Position: {x: 1140, y: -30, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 2330346463921120963}
-    m_Position: {x: 490, y: 470, z: 0}
+    m_Position: {x: 500, y: 460, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -4709254661671120134}
     m_Position: {x: 220, y: 480, z: 0}

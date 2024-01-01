@@ -10,13 +10,13 @@ EECS is a single/multiplayer combat game inspired by core and advanced concepts 
 Characters:
 
 Mathematician 
-(Powers)-> Integral, Line Integral, Summation, Vectors (Normal Vector & Angled Vector)
+(Powers)-> Integral, Summation, Vectors (Normal Vector & Angled Vector)
 
 Electrical Engineer 
-(Powers)-> Low Pass Filter, High Pass Filter, (HAND WEAPON???????), Current (DC/AC)
+(Powers)-> Low Pass Filter, Summation, Clk (DC Current)
 
 Software Engineer
-(Powers)-> ???
+(Powers)-> TBD
 
 
 Player One Controller (See Controls in Starter Assets Input):
@@ -27,7 +27,13 @@ Punch/Kick, (Weapon Equip) Swing/Jab		- P/K
 Special Hand Weapon Attack (Weapon Unequip)	- H
 Jump (+ Backward/Forward) (Weapon Unequip)	- Space (+ A/D)
 Crouch						- C
+Special Move					- U
 
+
+
+
+
+##### TUTORIALS #####
 
 How To Add A New Move
 
@@ -43,8 +49,6 @@ C_Controller Script : When changes to the Player controls need to be made, inclu
 
 
 
-TUTORIALS
-
 How To Create A Prefab (Blender)
 
 1. Import a reference image by switching to Object Mode (if not already there) and choose "Add", then "Image" and "Reference"
@@ -59,7 +63,7 @@ How To Create A Prefab (Blender)
 
 6. (For Weapons) Create an empty object on the player and place/adjust the new asset there.
 
-7. (For Weapon) Create a new Serialized GameObject variable in the script and drag the new asset there. Use Destroy() and Instantiate() functions for equip/unequip effect.
+7. (For Weapon) Create a new Serialized GameObject variable in the script and drag the new asset there. Use Instantiate() and Destroy() functions for equip/unequip effect.
 
 
 

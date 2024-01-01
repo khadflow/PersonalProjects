@@ -7,9 +7,9 @@ namespace StarterAssets
     public class WeaponDamageHandler : MonoBehaviour
     {
         private bool TakeDamage;
-        public bool Attacking = false;
+        private bool Attacking = false;
         private float NextAttackTime;
-        private float CoolDownTime = 1.0f;
+        private float CoolDownTime = 2.0f;
 
         void OnTriggerEnter(Collider opponent)
         {
@@ -27,11 +27,8 @@ namespace StarterAssets
                 TakeDamage = false;
                 NextAttackTime = Time.time + CoolDownTime;
                 Attacking = false;
-            } else
-            {
-                Attacking = false;
-                TakeDamage= false;
             }
+
             Debug.Log("Exit");
         }
 
@@ -43,6 +40,11 @@ namespace StarterAssets
         void OnTriggerExit(Collider opponent)
         {
            
+        }
+
+        public void Attack()
+        {
+            Attacking = true;
         }
     }
 
