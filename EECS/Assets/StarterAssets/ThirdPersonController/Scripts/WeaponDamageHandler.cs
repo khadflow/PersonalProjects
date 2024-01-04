@@ -13,7 +13,6 @@ namespace StarterAssets
 
         void OnTriggerEnter(Collider opponent)
         {
-            Debug.Log("Enter");
             string tag = transform.tag;
             TakeDamage = false;
             if (tag != opponent.gameObject.tag)
@@ -28,8 +27,6 @@ namespace StarterAssets
                 NextAttackTime = Time.time + CoolDownTime;
                 Attacking = false;
             }
-
-            Debug.Log("Exit");
         }
 
         void OnTriggerStay(Collider opponent)

@@ -2,38 +2,57 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace StarterAssets
 {
     public class PlayerSpawn : MonoBehaviour
-    {
-        public bool ActiveGame;
-
-        public GameObject[] characters;
-        private int selectedCharacter = 0;
-        public GameObject _mainCamera;
-        public GameObject Player;
-        public GameObject Player2;
-        private bool Players_Spawned;
+    {   
+        /* UI Management */
+        private bool ActiveGame;
         private Vector3 MenuPos;
-        private float dist = 3.0f;
+        private Vector3 HiddenPos;
+        private Image image;
+        public Button[] MainMenuButtons;
+        public Button[] PlayerSelectButtons;
 
         private float MenuTimer;
         private float MenuCountdown = 5.0f;
 
+        /* Player Spawn Management */
+        private float dist = 3.0f;
+        private PlayerSelect PlayerSelection;
         private GameObject P1, P2;
-
         private Vector3 P1StartLocation, P2StartLocation;
+        public GameObject _mainCamera;
 
-        // Start is called before the first frame update
+        private GameObject Player;
+        private GameObject Player2;
+        private bool Players_Spawned;
+        
         void Start()
         {
+            foreach (Button b in PlayerSelectButtons)
+            {
+                b.gameObject.SetActive(false);
+            }
+
+            // Menu Components
+            PlayerSelection = GetComponent<PlayerSelect>();
+            image = GetComponent<Image>();
+
+            // Default Players
+            SetPlayerOne(PlayerSelection.Characters[0]);
+            SetPlayerTwo(PlayerSelection.Characters[1]);
+
+            // UI
             ActiveGame = false;
             Players_Spawned = false;
             MenuPos = transform.position;
+            PlayerSelection.SetMenuPos(MenuPos);
+            HiddenPos = new Vector3(_mainCamera.transform.position.x - 500, _mainCamera.transform.position.y - 500, _mainCamera.transform.position.z);
         }
 
-        // Update is called once per frame
         void Update()
         {
             if (ActiveGame && !Players_Spawned)
@@ -50,7 +69,7 @@ namespace StarterAssets
                 P2.tag = "Player2";
 
                 Players_Spawned = true;
-                this.transform.position = new Vector3(_mainCamera.transform.position.x - 500, _mainCamera.transform.position.y - 500, _mainCamera.transform.position.z);
+                this.transform.position = HiddenPos;
             }
             if (ActiveGame)
             {
@@ -58,9 +77,8 @@ namespace StarterAssets
                 player1_controller = P1.gameObject.GetComponent<C_Controller>();
                 player2_controller = P2.gameObject.GetComponent<C_Controller>();
 
-                if ((player2_controller.health <= 0.0f || player1_controller.health <= 0.0f) && C_Controller.Round > 2)
+                if (C_Controller.Round > 2)
                 {
-
                     MenuTimer = Time.time + MenuCountdown;
                     ActiveGame = false;
                     C_Controller.Round = 1;
@@ -69,10 +87,8 @@ namespace StarterAssets
 
             if (!ActiveGame && Players_Spawned)
             {
-                
                 if (MenuTimer < Time.time)
                 {
-
                     transform.position = MenuPos;
                     Destroy(P1);
                     Destroy(P2);
@@ -81,12 +97,29 @@ namespace StarterAssets
             }
         }
 
+        /* Character Selection Management */
         public void CharacterSelect()
         {
-            // TODO
-            /*characters[selectedCharacter].SetActive(false);
-            selectedCharacter = (selectedCharacter + 1) % characters.Length;
-            characters[selectedCharacter].SetActive(true);*/
+            PlayerSelection.Selecting();
+            foreach (Button b in MainMenuButtons)
+            {
+                b.gameObject.SetActive(false);
+            }
+            foreach (Button b in PlayerSelectButtons)
+            {
+                b.gameObject.SetActive(true);
+            }
+            image.gameObject.SetActive(false);
+        }
+
+        public void SetPlayerOne(GameObject P1)
+        {
+            Player = P1;
+        }
+
+        public void SetPlayerTwo(GameObject P2)
+        {
+            Player2 = P2;
         }
 
         public void ActivateGame()
@@ -97,9 +130,24 @@ namespace StarterAssets
             }
         }
 
+        public void ResetMainMenu()
+        {
+            foreach (Button b in PlayerSelectButtons)
+            {
+                b.gameObject.SetActive(false);
+            }
+
+            foreach (Button b in MainMenuButtons)
+            {
+                b.gameObject.SetActive(true);
+            }
+
+            image.gameObject.SetActive(true);
+        }
+
         public void EndGame()
         {
-            transform.position = MenuPos;
+            this.gameObject.SetActive(false);
             ActiveGame = false;
             Application.Quit();
         }

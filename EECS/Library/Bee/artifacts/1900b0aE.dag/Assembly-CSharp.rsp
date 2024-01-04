@@ -388,6 +388,7 @@
 "Assets/StarterAssets/ThirdPersonController/Scripts/Boundaries.cs"
 "Assets/StarterAssets/ThirdPersonController/Scripts/ClkCollider.cs"
 "Assets/StarterAssets/ThirdPersonController/Scripts/C_Controller.cs"
+"Assets/StarterAssets/ThirdPersonController/Scripts/PlayerSelect.cs"
 "Assets/StarterAssets/ThirdPersonController/Scripts/PlayerSpawn.cs"
 "Assets/StarterAssets/ThirdPersonController/Scripts/ThirdPersonController.cs"
 "Assets/StarterAssets/ThirdPersonController/Scripts/WeaponDamageHandler.cs"

@@ -16,6 +16,7 @@ namespace StarterAssets
 
     public class C_Controller : MonoBehaviour
     {
+        /* Starter Asset Variables - Start */
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
         public float MoveSpeed = 6.0f;
@@ -81,7 +82,21 @@ namespace StarterAssets
         private float _cinemachineTargetYaw;
         private float _cinemachineTargetPitch;
 
-        // player
+        private float _speed;
+        private float _animationBlend;
+        private float _targetRotation = 0.0f;
+        private float _rotationVelocity;
+        private float _verticalVelocity;
+        private float _terminalVelocity = 53.0f;
+
+        // timeout deltatime
+        private float _jumpTimeoutDelta;
+        private float _fallTimeoutDelta;
+
+        /* Starter Asset Variables - End */
+
+
+        /* Player & Round Management */
         public C_Controller opp;
         public static int NumPlayers = 0;
         private static float FirstPlayerDegrees = 90.0f;
@@ -90,23 +105,20 @@ namespace StarterAssets
         private static float MaxHealth = 4096;
         private static C_Controller[] players = new C_Controller[2];
 
+        private float health;
+        private Vector3 P1StartLocation, P2StartLocation;
+
         private static bool switchCondition = true; // Players are in the correct starting position
         private int playerNumber;
         private string PlayerType; // "Mathematician" "Electrical Engineer"
         private float _degrees;
-        private float _speed;
-        private float _animationBlend;
-        private float _targetRotation = 0.0f;
-        private float _rotationVelocity;
-        private float _verticalVelocity;
-        private float _terminalVelocity = 53.0f;
 
-        // Jumps
+        /* Jump Management */
         private bool backwardJump;
         private bool forwardJump;
         private bool jump;
 
-        // Cooldowns
+        /* Cooldown Counters */
         private float NextJumpTime;
         private float NextAttackTime;
         private float StunEndTime;
@@ -121,15 +133,7 @@ namespace StarterAssets
         private static float RoundLoadTime = 2.0f; // Adjust while debugging to play the game upon start
 
 
-        // player attributes
-        public float health;
-        private Vector3 P1StartLocation, P2StartLocation;
-
-        // timeout deltatime
-        private float _jumpTimeoutDelta;
-        private float _fallTimeoutDelta;
-
-        // animation IDs
+        /* animation IDs */
         private int _animIDSpeed;
         private int _animIDJumping;
         private int _animIDGrounded;
@@ -141,8 +145,7 @@ namespace StarterAssets
         private int _animIDHandWeapon;
         private int _animIDCrouch;
         private int _animIDsmo;
-
-        // animation IDs player attributes 
+ 
         private int _animIDStun;
         private int _animIDWeapon;
         private int _animIDPunch;
@@ -150,20 +153,15 @@ namespace StarterAssets
         private int _animIDAttackCoolDown;
         private int _animIDHealth;
 
-        // Weapon Management
+        /* Weapon Management */
         [SerializeField] GameObject WeaponHolder;
         [SerializeField] GameObject HandWeaponHolder;
         [SerializeField] GameObject Weapon;
         [SerializeField] GameObject HandWeapon;
         [SerializeField] GameObject WeaponSheath;
 
-        // Hand Weapon Extended Features
-        [SerializeField] GameObject ExtendedSummation; // Summation Extension
-
-        // Special Move - One
-        [SerializeField] GameObject VectorLeft;
-        [SerializeField] GameObject VectorRight;
-        [SerializeField] GameObject Clk;
+        private bool WeaponEquip = false;
+        private bool HandWeaponEquip = false;
 
         private GameObject[] vectors = new GameObject[3]; // Vector Dot and Cross Product
         private GameObject ActiveClk; // Clk
@@ -172,9 +170,15 @@ namespace StarterAssets
         private GameObject WeaponInSheath;
         private GameObject WeaponInHand;
 
-        private bool WeaponEquip = false;
-        private bool HandWeaponEquip = false;
+        /* Hand Weapon Extended Features */
+        [SerializeField] GameObject ExtendedSummation; // Summation Extension
 
+        /* Special Move - One */
+        [SerializeField] GameObject VectorLeft;
+        [SerializeField] GameObject VectorRight;
+        [SerializeField] GameObject Clk;
+
+        /* Melee Attack Management */
         private bool ComboStarted;
         private int KickPunch = 2; // 0 == Punch, 1 == Kick, 2 == unoccupied
         private int CurrentComboCount = 0;
@@ -189,6 +193,7 @@ namespace StarterAssets
         private StarterAssetsInputs _input;
         private GameObject _mainCamera;
 
+        /* Particle Management */
         [SerializeField] ParticleSystem _punchParticleSystem;
         [SerializeField] ParticleSystem _kickParticleSystem;
         private ParticleSystem ActiveParticles = null;
@@ -279,14 +284,14 @@ namespace StarterAssets
             }
             _hasAnimator = TryGetComponent(out _animator);
 
-            // Reset Health for the next round
+            // Reset for Next Round
             if (StunEndTime < Time.time && health <= 0.1f && Round == 2)
             {
                 health = MaxHealth;
                 opp.health = MaxHealth;
                 _animator.SetFloat(_animIDHealth, health);
                 opp._animator.SetFloat(opp._animIDHealth, opp.health);
-                StunEndTime = Time.time + 5.2f;
+                StunEndTime = Time.time + RoundLoadTime;
                 RoundCoolDown = false;
                 SetTimer();
             }
@@ -315,20 +320,19 @@ namespace StarterAssets
                 // Only accept input if the player isn't stunned
                 if (StunEndTime < Time.time)
                 {
-                    // if crouching is False, continue
                     if (!Crouch())
                     {
                         // Character cannot perform the melee SMO with a weapon in hand
                         if (WeaponInHand == null) {
                             if (PlayerType == "Mathematician") {
                                 VectorAttack();
-                            } else if (PlayerType == "Electrical Engineer")
+                            }
+                            else if (PlayerType == "Electrical Engineer")
                             {
-                                // AC/DC
                                 ClkAttack();
                             }
                         }
-                        if (HandWeaponEquip && ExtendedSummation != null && NextHandWeaponTime < Time.time + 4.0f)
+                        if (HandWeaponEquip && ExtendedSummation != null && NextHandWeaponTime < Time.time + 4.0f && ActiveClk == null)
                         {
                             Destroy(WeaponInHand);
                             WeaponInHand = Instantiate(ExtendedSummation, HandWeaponHolder.transform);
@@ -405,11 +409,11 @@ namespace StarterAssets
 
 
                 /* Summation Attack Handling */
-                // Return a Extended Summation to original model
                 if (ExtendedSummation != null)
                 {
                     if ((HandWeaponEquip && NextHandWeaponTime - 3.0f < Time.time))
                     {
+                        // Return a Extended Summation to original model
                         Destroy(WeaponInHand);
                         WeaponInHand = Instantiate(HandWeapon, HandWeaponHolder.transform);
                         WeaponInHand.tag = (playerNumber == 1) ? "Player" : "Player2";
@@ -425,7 +429,6 @@ namespace StarterAssets
                 }
 
                 // Vector Delete
-
                 if (NextAttackTime < Time.time && vectors[0] != null)
                 {
                     Destroy(vectors[0]);
@@ -461,11 +464,6 @@ namespace StarterAssets
             }
         }
 
-
-        private void SetTimer()
-        {
-            Timer = Time.time + RoundLoadTime;
-        }
         private void AssignAnimationIDs()
         {
             _animIDSpeed = Animator.StringToHash("Speed");
@@ -729,7 +727,7 @@ namespace StarterAssets
                         {
                             // Punches deal 2^8 damage
                             opp.TakeDamage(256);
-                            ActiveParticles = Instantiate(_kickParticleSystem, transform.position, transform.rotation);
+                            //ActiveParticles = Instantiate(_kickParticleSystem, transform.position, transform.rotation);
                         }
 
                     }
@@ -818,7 +816,7 @@ namespace StarterAssets
                         {
                             // Punches deal 2^6 damage
                             opp.TakeDamage(64);
-                            ActiveParticles = Instantiate(_punchParticleSystem, transform.position, transform.rotation);
+                            //ActiveParticles = Instantiate(_punchParticleSystem, transform.position, transform.rotation);
                         }
 
                     }
@@ -888,7 +886,7 @@ namespace StarterAssets
                     _animator.SetBool(_animIDPunch, _input.punch);
                     WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
                 }
-                else
+                else if (PlayerType == "Electrical Engineer")
                 {
                     _animator.SetBool(_animIDPunch, _input.punch);
                     if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back") && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run 0"))
@@ -949,7 +947,7 @@ namespace StarterAssets
 
         private void EquipHandWeapon()
         {
-            if (_input.equipHandWeapon && NextHandWeaponTime < Time.time && NextAttackTime < Time.time && !HandWeaponEquip && _input.move == Vector2.zero)
+            if (_input.equipHandWeapon && NextHandWeaponTime < Time.time && NextAttackTime < Time.time && !HandWeaponEquip && _input.move == Vector2.zero && ActiveClk == null)
             {
 
                 WeaponInHand = Instantiate(HandWeapon, HandWeaponHolder.transform);
@@ -988,7 +986,7 @@ namespace StarterAssets
                     _animator.SetBool(_animIDsmo, true);
                     HandWeaponEquip = false;
                     ActiveClk = Instantiate(Clk, new Vector3(transform.position.x + (_degrees == FirstPlayerDegrees ? 2.0f : -2.0f), transform.position.y + 1.0f, transform.position.z), Quaternion.Euler(0.0f, -_degrees, 0.0f));
-                    //Debug.Log("Degrees : " + _degrees);
+
                     ActiveClk.GetComponent<ClkCollider>().setDegrees(_degrees);
                     ActiveClk.tag = (playerNumber == 1) ? "Player" : "Player2";
                     ActiveClk.GetComponent<WeaponDamageHandler>().Attack();
@@ -1062,10 +1060,9 @@ namespace StarterAssets
 
                         VectorDirection = -0.2f;
                     }
-                    
                 }
             }
-            
+
             if (NextAttackTime < Time.time)
             {
                 _input.smo = false;
@@ -1073,17 +1070,33 @@ namespace StarterAssets
             }
         }
 
+        /* Timers */
+        private void SetTimer()
+        {
+            Timer = Time.time + RoundLoadTime;
+        }
+
+        public float getNextAttackTime()
+        {
+            return NextAttackTime;
+        }
 
         /* Damage from Attacks */
         public void TakeDamage(float damage)
         {
             // Make sure the player can't take damage while already stunned
-            if (StunEndTime < Time.time && !_input.crouch)
+            if (StunEndTime < Time.time && !_input.crouch && Time.time < opp.getNextAttackTime())
             {
                 health -= damage;
                 _animator.SetFloat(_animIDHealth, health);
                 _animator.SetBool(_animIDStun, true);
-                StunEndTime = Time.time;// Time.time + AttackCoolDownTime;
+                StunEndTime = Time.time + AttackCoolDownTime;
+            } else if (opp.getNextAttackTime() < Time.time && !_input.crouch && StunEndTime < Time.time)
+            {
+                health -= damage;
+                StunEndTime = Time.time + 0.345f;
+                _animator.SetFloat(_animIDHealth, health);
+                _animator.SetBool(_animIDStun, true);
             }
 
             if (health <= 0.1f && !RoundCoolDown)
@@ -1093,6 +1106,10 @@ namespace StarterAssets
             }
         }
 
+        public float getHealth()
+        {
+            return health;
+        }
 
         /* Return to nearest original starting position */
         private void ReturnToStart()
@@ -1119,7 +1136,7 @@ namespace StarterAssets
 
 
 
-        /* Starter Asset Functions */
+        /* Starter Asset Functions - Start */
         private void GroundedCheck()
         {
             // set sphere position, with offset
@@ -1196,44 +1213,7 @@ namespace StarterAssets
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
             }
         }
+
+        /* Starter Asset Functions - End */
     }
 }
-
-
-
-
-/*if (ComboStarted && NextAttackTime < Time.time)
-{
-    _animator.SetBool(_animIDPunch, false);
-}*/
-
-/*if (NextAttackTime < Time.time) {
-    // A punch can only happen if the player isn't moving
-    if (_input.punch)// && _input.move == Vector2.zero)
-    {
-        _animator.SetBool(_animIDPunch, _input.punch);
-        NextAttackTime = Time.time + AttackCoolDownTime;
-        _input.move = Vector2.zero;
-        _input.punch = false;
-
-        // Is the enemy close enough??
-        float oppX = opp.transform.position.x;
-        float X = transform.position.x;
-        if (System.Math.Abs(oppX - X) <= 1.2f)
-        {
-            // Punches deal 2^6 damage
-            Instantiate(_punchParticleSystem, transform.position, transform.rotation);
-            opp.TakeDamage(64);
-        }
-    }
-    else
-    {
-        _animator.SetBool(_animIDPunch, false);
-    }
-} else
-{
-    _input.punch = false;
-    _animator.SetBool(_animIDPunch, _input.punch);
-}*/
-
-/* Weapon Attacks */
