@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+using TMPro;
+using Unity.VisualScripting;
 namespace StarterAssets
 {
     public class PlayerSpawn : MonoBehaviour
@@ -15,6 +16,9 @@ namespace StarterAssets
         private Image image;
         public Button[] MainMenuButtons;
         public Button[] PlayerSelectButtons;
+
+        public GameObject Round;
+        private TextMeshProUGUI tmp;
 
         private float MenuTimer;
         private float MenuCountdown = 5.0f;
@@ -37,6 +41,9 @@ namespace StarterAssets
                 b.gameObject.SetActive(false);
             }
 
+            // Round Display
+            Round.SetActive(false);
+
             // Menu Components
             PlayerSelection = GetComponent<PlayerSelect>();
             image = GetComponent<Image>();
@@ -55,10 +62,10 @@ namespace StarterAssets
 
         void Update()
         {
+            
             if (ActiveGame && !Players_Spawned)
             {
-                //SceneManager.LoadScene("Playground");
-                C_Controller.NumPlayers = 0;
+                C_Controller.NumberOfPlayers = 0;
 
                 P1StartLocation = new Vector3(_mainCamera.transform.position.x - dist, _mainCamera.transform.position.y - 2, _mainCamera.transform.position.z + 20);
                 P2StartLocation = new Vector3(_mainCamera.transform.position.x + dist, _mainCamera.transform.position.y - 2, _mainCamera.transform.position.z + 20);
@@ -76,13 +83,18 @@ namespace StarterAssets
                 C_Controller player1_controller, player2_controller;
                 player1_controller = P1.gameObject.GetComponent<C_Controller>();
                 player2_controller = P2.gameObject.GetComponent<C_Controller>();
-
+                
                 if (C_Controller.Round > 2)
                 {
                     MenuTimer = Time.time + MenuCountdown;
                     ActiveGame = false;
-                    C_Controller.Round = 1;
-                } 
+                    C_Controller.ResetRound();
+                }
+
+                if (C_Controller.Round <= 2 && ActiveGame)
+                {
+                    tmp.text = "Round " + C_Controller.Round.ToString();
+                }
             } 
 
             if (!ActiveGame && Players_Spawned)
@@ -115,17 +127,28 @@ namespace StarterAssets
         public void SetPlayerOne(GameObject P1)
         {
             Player = P1;
+            Player.gameObject.GetComponent<C_Controller>().Degrees = 90.0f;
+            Player.gameObject.GetComponent<C_Controller>().SetPlayerNumber(1);
+            Player.gameObject.GetComponent<C_Controller>().SetHealth();
         }
 
         public void SetPlayerTwo(GameObject P2)
         {
             Player2 = P2;
+            Player2.gameObject.GetComponent<C_Controller>().Degrees = 270.0f;
+            Player2.gameObject.GetComponent<C_Controller>().SetPlayerNumber(2);
+            Player2.gameObject.GetComponent<C_Controller>().SetHealth();
         }
 
         public void ActivateGame()
         {
             if (!ActiveGame)
             {
+                C_Controller.ResetSwitchCondiition();
+                C_Controller.ResetRoundCoolDown();
+                Round.SetActive(true);
+                tmp = Round.GetComponent<TextMeshProUGUI>();
+                tmp.text = "Round " + C_Controller.Round.ToString();
                 ActiveGame = true;
             }
         }

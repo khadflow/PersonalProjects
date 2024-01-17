@@ -444,13 +444,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1219663414673098854}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.5, y: 0.5, z: -0.5, w: 0.5}
-  m_LocalPosition: {x: -0.387, y: 0.174, z: -0}
+  m_LocalRotation: {x: 0.5207781, y: 0.52077806, z: -0.4783201, w: 0.47832018}
+  m_LocalPosition: {x: -0.3870007, y: 0.17619121, z: 0.00480175}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4555918049617679051}
-  m_LocalEulerAnglesHint: {x: 90, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 94.867004, y: 0, z: -90}
 --- !u!1 &1353352848637803387
 GameObject:
   m_ObjectHideFlags: 0
@@ -1366,13 +1366,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2
+  m_Height: 1.9
   m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!114 &1856740715909043109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1482,7 +1482,6 @@ MonoBehaviour:
   CameraAngleOverride: 0
   LockCameraPosition: 0
   opp: {fileID: 0}
-  health: 16
   WeaponHolder: {fileID: 6758122660004087884}
   HandWeaponHolder: {fileID: 1219663414673098854}
   Weapon: {fileID: 2183179441735274170, guid: 8657c1cc2a72ced4fbaf5294dc361e67, type: 3}

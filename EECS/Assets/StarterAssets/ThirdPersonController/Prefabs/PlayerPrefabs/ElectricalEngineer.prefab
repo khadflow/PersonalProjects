@@ -352,13 +352,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2
+  m_Height: 1.9
   m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 1.01, z: 0}
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!114 &-2579881269143716717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -424,7 +424,6 @@ MonoBehaviour:
   CameraAngleOverride: 0
   LockCameraPosition: 0
   opp: {fileID: 0}
-  health: 0
   WeaponHolder: {fileID: 7050682139090012255}
   HandWeaponHolder: {fileID: 2449860660261319636}
   Weapon: {fileID: 6820385663346354784, guid: c9b324a14825c384683677122831f5a5, type: 3}

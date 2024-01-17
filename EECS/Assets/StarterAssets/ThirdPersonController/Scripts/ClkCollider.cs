@@ -19,7 +19,7 @@ namespace StarterAssets
         // Update is called once per frame
         void Update()
         {
-            float offset = -0.15f;
+            float offset = -0.55f;
             //Debug.Log(_degrees);
             if (_degrees == 90.0f || _degrees == 270.0f) { // left side of the screen
 

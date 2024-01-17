@@ -9,7 +9,7 @@ namespace StarterAssets
         private bool TakeDamage;
         private bool Attacking = false;
         private float NextAttackTime;
-        private float CoolDownTime = 2.0f;
+        private float CoolDownTime = 0.7f;
 
         void OnTriggerEnter(Collider opponent)
         {
@@ -27,6 +27,11 @@ namespace StarterAssets
                 NextAttackTime = Time.time + CoolDownTime;
                 Attacking = false;
             }
+        }
+
+        public float GetCoolDownTime()
+        {
+            return CoolDownTime;
         }
 
         void OnTriggerStay(Collider opponent)
