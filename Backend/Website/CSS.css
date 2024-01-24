@@ -1,0 +1,98 @@
+h1 {
+	font-style: italic;
+	font-weight: bold;
+	text-align: center;
+	font-size: 25px;
+}
+
+h2 {
+	font-size: 20px;
+	font-family: monospace;
+	text-align: center;
+}
+
+h3 {
+	text-decoration: underline;
+	font-weight: bold;
+}
+
+td {
+	padding:7px;
+	border:double;
+}
+
+body {
+	background-color:black;
+	font-family: monospace;
+	font-size:15px;
+	line-height:15px;
+	color:green;
+}
+            
+p {
+	color:green;
+}
+    
+.image {
+	border:double;
+	border-width:thick;
+}
+
+.date {
+	text-decoration:underline;
+}
+
+.Programming-Blog {
+	width:50%;
+	height:10%;
+	overflow-y:auto;
+	
+	border:solid;
+	border-width:thin;
+	
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 10px;
+	
+	margin: 20px;
+}
+
+#accomplishment-table {
+	padding:10px;
+	float:left;
+}
+
+#content {
+	margin-right:10px;
+	float:left;
+}
+
+#References {
+	margin:20px;
+	padding-left:10px;
+	padding-right:10px;
+	padding-bottom:10px;
+	padding-top:2px;
+	
+	clear:both;
+	width:90%;
+	
+	float:left;
+	text-align:center;
+}
+
+a:link {
+	color:blue;
+}
+
+a:visited {
+	color:purple;
+}
+
+a:hover {
+	color:seagreen;
+}
+
+a:active {
+	color:red;
+}
