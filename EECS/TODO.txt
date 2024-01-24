@@ -1,0 +1,29 @@
+TODO
+
+Player 
+1. Fist and Foot Colliders for melee attacks
+(currently, landed attacks are determined by player proximity)
+2. Stun / Stun stumble backwards
+3. New Animations (run, step back, special move, weapon equip/unequip)
+
+Weapons
+1. Vectors
+2. 1D, 2D, and 3D Axis
+3. Weapon combo system
+
+UI
+1. Player Health Bars
+2. Loading Screen
+
+Environment
+1. CS184 Shading Room
+2. "Gamescrafters" animated logo
+3. "Hands on Ham" animated banner
+
+Sound
+1. Movement
+2. Fighting
+3. Weapon Equip / unequip
+4. Weapon Combat
+5. Collisions
+6. Announcer voice
