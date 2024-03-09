@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: e9cbdbd9a70526f4e893697c6bf5814e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 17ad81021a91a794a9b5b4db98ff7c2c, type: 2}
     - target: {fileID: 919132149155446097, guid: e9cbdbd9a70526f4e893697c6bf5814e, type: 3}
       propertyPath: m_Name
       value: projectile
@@ -95,7 +99,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9dbdda90ddc28148b36b5abcca49a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Attacking: 0
 --- !u!54 &-6447440318856687047
 Rigidbody:
   m_ObjectHideFlags: 0

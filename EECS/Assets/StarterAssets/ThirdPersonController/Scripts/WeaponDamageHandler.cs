@@ -20,12 +20,17 @@ namespace StarterAssets
                 TakeDamage = true;
             }
             C_Controller opp = opponent.GetComponent<C_Controller>();
-            if (Attacking && TakeDamage && NextAttackTime < Time.time)
+            if (Attacking && TakeDamage && NextAttackTime < Time.time && opp != null)
             {
                 opp.TakeDamage(1);
                 TakeDamage = false;
                 NextAttackTime = Time.time + CoolDownTime;
                 Attacking = false;
+            } else if (opp == null)
+            {
+                TakeDamage = false;
+                Attacking = false;
+                NextAttackTime = Time.time + CoolDownTime;
             }
         }
 

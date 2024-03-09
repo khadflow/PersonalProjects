@@ -291,7 +291,7 @@ namespace StarterAssets
             _hasAnimator = TryGetComponent(out _animator);
 
             // Reset for Next Round
-            if (StunEndTime + 1.0f < Time.time && health <= 0.1f && Round == 2)
+            if (StunEndTime + 1.0f < Time.time && health <= 0.1f)
             {
                 health = MaxHealth;
                 opp.health = MaxHealth;
@@ -308,10 +308,11 @@ namespace StarterAssets
             }
 
 
-            if (Time.time < Timer && Round == 2)
+            if (Time.time < Timer)
             {
                 DisableInput();
                 opp.DisableInput();
+                Move();
             }
             else if (Timer < Time.time)
             {
@@ -393,10 +394,6 @@ namespace StarterAssets
                         if (NextAttackTime - 0.1f < Time.time && NextHandWeaponTime - 2.5f < Time.time)
                         {
                             Move();
-                        }
-                        else
-                        {
-                            _input.move = Vector2.zero;
                         }
                     }
                     else
@@ -485,7 +482,7 @@ namespace StarterAssets
 
 
                 // Clk - Start
-                if (NextAttackTime - 0.5f < Time.time && ActiveClk != null)
+                if (NextAttackTime < Time.time && ActiveClk != null)
                 {
                     Destroy(ActiveClk);
                 }
@@ -500,7 +497,9 @@ namespace StarterAssets
                 // EE - Weapon Projectile
                 bool activeSwingAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Swing");
                 bool activeJabAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Jab");
-                if (PlayerType == "Electrical Engineer" && (activeJabAnimation || activeSwingAnimation) && !ProjectileFired && NextSwordSwing < Time.time)
+                if (PlayerType == "Electrical Engineer"
+                        && (activeJabAnimation || activeSwingAnimation)
+                        && !ProjectileFired && NextSwordSwing < Time.time)
                 {
                     ProjectileFired = true;
                     NextSwordSwing = Time.time + AttackCoolDownTime;
@@ -646,11 +645,9 @@ namespace StarterAssets
 
         private void Move()
         {
-
             // Stop Movement
             if (Time.time < AcceptedComboInputTime || Time.time < NextAttackTime)
             {
-                _input.move = Vector2.zero;
                 _speed = 0.0f;
                 _animator.SetFloat(_animIDSpeed, 0.0f);
             }
@@ -773,7 +770,6 @@ namespace StarterAssets
                 _animator.SetFloat(_animIDSpeed, 0.0f);
             }
         }
-
 
         /* Hand Attacks */
 
@@ -934,7 +930,6 @@ namespace StarterAssets
 
         /* Weapon Attacks */
 
-
         /* Equip Primary Weapon for the Character */
         private void EquipWeapon()
         {
@@ -977,7 +972,6 @@ namespace StarterAssets
                         _animator.SetBool(_animIDPunch, _input.punch);
                         
                         ProjectileFired = false;
-                        //WeaponInHand.GetComponent<WeaponDamageProjectiles>().Attack();
                     }
                 }
                 _input.punch = false;
@@ -1066,6 +1060,7 @@ namespace StarterAssets
         /* Special Attacks */
         private void ClkAttack()
         {
+            // !_animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne")
             if (NextAttackTime < Time.time)
             {
                 if (_input.smo & NextHandWeaponTime < Time.time)
@@ -1073,17 +1068,21 @@ namespace StarterAssets
                     NextAttackTime = Time.time + AttackCoolDownTime;
                     _animator.SetBool(_animIDsmo, true);
                     HandWeaponEquip = false;
-                    ActiveClk = Instantiate(Clk, new Vector3(transform.position.x + (_degrees == FirstPlayerDegrees ? 2.0f : -2.0f), transform.position.y + 1.0f, transform.position.z), Quaternion.Euler(0.0f, -_degrees, 0.0f));
-
-                    ActiveClk.GetComponent<ClkCollider>().setDegrees(_degrees);
-                    ActiveClk.tag = (PlayerNumber == 1) ? "Player" : "Player2";
-
-                    _input.move = Vector2.zero;
-                    _speed = 0.0f;
-                    _animator.SetFloat(_animIDSpeed, 0.0f);
-
-                    ActiveClk.GetComponent<WeaponDamageHandler>().Attack();
                 }
+            }
+
+            if (_animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne") && ActiveClk == null)
+            {
+                ActiveClk = Instantiate(Clk, new Vector3(transform.position.x + (_degrees == FirstPlayerDegrees ? 2.0f : -2.0f), transform.position.y + 1.0f, transform.position.z), Quaternion.Euler(0.0f, -_degrees, 0.0f));
+
+                ActiveClk.GetComponent<ClkCollider>().setDegrees(_degrees);
+                ActiveClk.tag = (PlayerNumber == 1) ? "Player" : "Player2";
+
+                _input.move = Vector2.zero;
+                _speed = 0.0f;
+                _animator.SetFloat(_animIDSpeed, 0.0f);
+
+                ActiveClk.GetComponent<WeaponDamageHandler>().Attack();
             }
         }
         private void VectorAttack()
@@ -1095,67 +1094,73 @@ namespace StarterAssets
                     NextAttackTime = Time.time + AttackCoolDownTime;
                     _animator.SetBool(_animIDsmo, true);
                     HandWeaponEquip = false;
+                }
+            }
 
-                    // Instantiate Vector depending on Player Direction
+            if (_animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne") && vectors[0] == null)
+            {
+                // Instantiate Vector depending on Player Direction
 
-                    float angleX = 0.0f;
-                    float angleY = 0.0f;
-                    float angleZ = 0.0f;
-                    float angle = 0.0f;
+                float angleX = 0.0f;
+                float angleY = 0.0f;
+                float angleZ = 0.0f;
+                float angle = 0.0f;
 
-                    float x, y, z;
-                    float offsetY, offsetX;
-                    if (_input.move != Vector2.zero) // Moving
-                    {
-                        angleX = 0.0f;
-                        angleY = 180.0f;
-                        angleZ = 72.0f;
-                        angle = 180.0f;
-                        x = -2.0f;
-                        y = -2.0f;
-                        z = 0.0f;
-                        offsetY = 0.5f;
-                        offsetX = 0.0f;
-                        _input.move = Vector2.zero;
-                        _speed = 0.0f;
-                        _animator.SetFloat(_animIDSpeed, 0.0f);
+                float x, y, z;
+                float offsetY, offsetX;
+                if (_input.move != Vector2.zero) // Moving
+                {
+                    angleX = 0.0f;
+                    angleY = 180.0f;
+                    angleZ = 72.0f;
+                    angle = 180.0f;
+                    x = -2.0f;
+                    y = -2.0f;
+                    z = 0.0f;
+                    offsetY = 0.5f;
+                    offsetX = 0.0f;
+                    _input.move = Vector2.zero;
+                    _speed = 0.0f;
+                    _animator.SetFloat(_animIDSpeed, 0.0f);
 
-                    } else // Not Moving
-                    {
-                        angleX = 0.0f;
-                        angleY = 0.0f;
-                        angleZ = 20.0f;
-                        angle = 0.0f;
-                        x = 1.0f;
-                        y = -4.0f;
-                        z = 0.0f;
-                        offsetY = 0.0f;
-                        offsetX = 0.5f;
-                    }
-                    if (_degrees == FirstPlayerDegrees) // Left and Right Vector
-                    {
-                        vectors[0] = Instantiate(VectorLeft, new Vector3(transform.position.x + x, y, z), Quaternion.Euler(angleX, angleY, angleZ));
-                        vectors[0].GetComponent<WeaponDamageHandler>().Attack();
+                }
+                else // Not Moving
+                {
+                    angleX = 0.0f;
+                    angleY = 0.0f;
+                    angleZ = 20.0f;
+                    angle = 0.0f;
+                    x = 1.0f;
+                    y = -4.0f;
+                    z = 0.0f;
+                    offsetY = 0.0f;
+                    offsetX = 0.5f;
+                }
+                if (_degrees == FirstPlayerDegrees) // Left and Right Vector
+                {
+                    vectors[0] = Instantiate(VectorLeft, new Vector3(transform.position.x + x, y, z), Quaternion.Euler(angleX, angleY, angleZ));
+                    vectors[0].GetComponent<WeaponDamageHandler>().Attack();
 
-                        vectors[1] = Instantiate(VectorLeft, new Vector3(transform.position.x + x + offsetX, y - offsetY, z), Quaternion.Euler(angleX, angleY, angleZ));
-                        vectors[1].GetComponent<WeaponDamageHandler>().Attack();
+                    vectors[1] = Instantiate(VectorLeft, new Vector3(transform.position.x + x + offsetX, y - offsetY, z), Quaternion.Euler(angleX, angleY, angleZ));
+                    vectors[1].GetComponent<WeaponDamageHandler>().Attack();
 
-                        vectors[2] = Instantiate(VectorLeft, new Vector3(transform.position.x + x + 2.0f * offsetX, y - 2.0f * offsetY, z), Quaternion.Euler(angleX, angleY, angleZ));
-                        vectors[2].GetComponent<WeaponDamageHandler>().Attack();
+                    vectors[2] = Instantiate(VectorLeft, new Vector3(transform.position.x + x + 2.0f * offsetX, y - 2.0f * offsetY, z), Quaternion.Euler(angleX, angleY, angleZ));
+                    vectors[2].GetComponent<WeaponDamageHandler>().Attack();
 
-                        VectorDirection = 0.2f;
-                    } else {                            // Normal Vectors
-                        vectors[0] = Instantiate(VectorRight, new Vector3(transform.position.x - x, y, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
-                        vectors[0].GetComponent<WeaponDamageHandler>().Attack();
+                    VectorDirection = 0.2f;
+                }
+                else
+                {                            // Normal Vectors
+                    vectors[0] = Instantiate(VectorRight, new Vector3(transform.position.x - x, y, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
+                    vectors[0].GetComponent<WeaponDamageHandler>().Attack();
 
-                        vectors[1] = Instantiate(VectorRight, new Vector3(transform.position.x - x - offsetX, y - offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
-                        vectors[1].GetComponent<WeaponDamageHandler>().Attack();
+                    vectors[1] = Instantiate(VectorRight, new Vector3(transform.position.x - x - offsetX, y - offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
+                    vectors[1].GetComponent<WeaponDamageHandler>().Attack();
 
-                        vectors[2] = Instantiate(VectorRight, new Vector3(transform.position.x - x - 2.0f * offsetX, y - 2.0f * offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
-                        vectors[2].GetComponent<WeaponDamageHandler>().Attack();
+                    vectors[2] = Instantiate(VectorRight, new Vector3(transform.position.x - x - 2.0f * offsetX, y - 2.0f * offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
+                    vectors[2].GetComponent<WeaponDamageHandler>().Attack();
 
-                        VectorDirection = -0.2f;
-                    }
+                    VectorDirection = -0.2f;
                 }
             }
 
@@ -1304,94 +1309,3 @@ namespace StarterAssets
         /* Starter Asset Functions - End */
     }
 }
-
-
-
-
-
-/*if (NextAttackTime < Time.time)
-{
-    // Starting a new combo or continuing a Punch combo
-    if (_input.punch && !_input.kick && (KickPunch == 2 || KickPunch == 0))
-    {
-        // Process Combo Input
-
-        // First Punch
-        if (!ComboStarted && CurrentComboCount == 0)
-        {
-            KickPunch = 0;
-            ComboStarted = true;
-            CurrentComboCount++;
-            AcceptedComboInputTime = Time.time + 5.0f; // Accepted Combo Input
-
-            _animator.SetBool(_animIDPunch, true); // Start Punching animation
-            float oppX = opp.transform.position.x;
-            float X = transform.position.x;
-            if (System.Math.Abs(oppX - X) <= 1.5f)
-            {
-                // Punches deal 2^6 damage
-                opp._animator.SetBool(_animIDStun, true);
-                opp.TakeDamage(64);
-            }
-        }
-        // Second Punch
-        else if (ComboStarted && CurrentComboCount == 1 && KickPunch == 0 && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
-        {
-            CurrentComboCount++;
-            _animator.SetBool(_animIDPunch, true); // Start Illegal Elbow animation
-            float oppX = opp.transform.position.x;
-            float X = transform.position.x;
-            if (System.Math.Abs(oppX - X) <= 1.2f)
-            {
-                // Punches deal 2^6 damage
-                opp._animator.SetBool(_animIDStun, true);
-                opp.TakeDamage(64);
-            }
-        }
-        // Third Punch
-        else if (ComboStarted && CurrentComboCount == 2 && KickPunch == 0 && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching") && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Illegal Elbow Punch"))
-        {
-            CurrentComboCount++;
-            _animator.SetBool(_animIDPunch, true); // Start MMA Kick animation
-            float oppX = opp.transform.position.x;
-            float X = transform.position.x;
-            if (System.Math.Abs(oppX - X) <= 1.2f)
-            {
-                // Punches deal 2^6 damage
-                opp._animator.SetBool(_animIDStun, true);
-                opp.TakeDamage(64);
-            }
-            NextAttackTime = Time.time + AttackCoolDownTime;
-        }
-
-        // Cut off Attack time if input time has expired OR MaxCombo Reached
-        if ((ComboStarted && AcceptedComboInputTime < Time.time) || (ComboStarted && CurrentComboCount >= MaxComboCount))
-        {
-            NextAttackTime = Time.time + AttackCoolDownTime;
-        }
-        _input.punch = false;
-    }
-
-    else if (KickPunch == 0 && !_input.punch && CurrentComboCount == 1 && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
-    {
-        _animator.SetBool(_animIDPunch, false);
-        ComboStarted = false;
-        CurrentComboCount = 0;
-        KickPunch = 2;
-    }
-    else if (KickPunch == 0 && !_input.punch && CurrentComboCount == 2 && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching") && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Illegal Elbow Punch"))
-    {
-        _animator.SetBool(_animIDPunch, false);
-        ComboStarted = false;
-        CurrentComboCount = 0;
-        KickPunch = 2;
-    }
-    else if (KickPunch == 0 && !_input.punch && CurrentComboCount == 3 && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching") && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Illegal Elbow Punch") && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
-    {
-        _animator.SetBool(_animIDPunch, false);
-        ComboStarted = false;
-        CurrentComboCount = 0;
-        KickPunch = 2;
-        Destroy(ActiveParticles);
-    }
-}*/
