@@ -5,6 +5,7 @@ Player
 (currently, landed attacks are determined by player proximity)
 2. Stun / Stun stumble backwards
 3. New Animations (run, step back, special move, weapon equip/unequip)
+4. Block / Breaker Buster
 
 Weapons
 1. Vectors
