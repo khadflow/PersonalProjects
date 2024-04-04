@@ -20,7 +20,7 @@ namespace StarterAssets
 
     public class C_Controller : MonoBehaviour
     {
-        /* Starter Asset Variables - Start */
+        /* Shared */
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
         public float MoveSpeed = 2.5f;
@@ -97,47 +97,20 @@ namespace StarterAssets
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
 
-        /* Starter Asset Variables - End */
-
-
-        /* Player & Round Management */
-        public C_Controller opp;
+        // Round management
+        public static int Round = 1;
         private static int NumPlayers = 0;
+        private static float MaxHealth = 4096;
+        private static bool switchCondition = true;
         private static float FirstPlayerDegrees = 90.0f;
         private static float SecondPlayerDegrees = 270.0f;
-        public static int Round = 1;
-        private static float MaxHealth = 4096;
         private static C_Controller[] players = new C_Controller[2];
 
-        private float health;
-        private Vector3 P1StartLocation, P2StartLocation;
-
-        private static bool switchCondition = true; // Players are in the correct starting position
-        private int PlayerNumber;
-        private string PlayerType; // "Mathematician" "Electrical Engineer"
-        private float _degrees;
-
-        /* Jump Management */
-        private bool backwardJump;
-        private bool forwardJump;
-        private bool jump;
-
-        /* Cooldown Counters */
-        private float NextJumpTime;
-        private float NextAttackTime;
-        private float StunEndTime;
-        private float JumpCoolDownTime = 1.2f;
-        private float AttackCoolDownTime = 1.5f;
-        private float NextSwordSwing;
-        private bool CoolDown;
-        private float NextHandWeaponTime;
-        private float HandWeaponTimeOut = 5.0f;
-        private static bool RoundCoolDown = false;
         private static float Timer;
-        private static float RoundLoadTime = 5.0f; // Adjust while debugging to play the game upon start
+        private static float RoundLoadTime = 5.0f;
+        private static bool RoundCoolDown = false;
 
-
-        /* animation IDs */
+        /* shared animation IDs */
         private int _animIDSpeed;
         private int _animIDJumping;
         private int _animIDGrounded;
@@ -149,7 +122,7 @@ namespace StarterAssets
         private int _animIDHandWeapon;
         private int _animIDCrouch;
         private int _animIDsmo;
- 
+
         private int _animIDStun;
         private int _animIDWeapon;
         private int _animIDPunch;
@@ -157,38 +130,63 @@ namespace StarterAssets
         private int _animIDAttackCoolDown;
         private int _animIDHealth;
 
-        /* Weapon Management */
-        [SerializeField] GameObject WeaponHolder;
-        [SerializeField] GameObject HandWeaponHolder;
+        /* Shared Weapon Management */
         [SerializeField] GameObject Weapon;
         [SerializeField] GameObject HandWeapon;
         [SerializeField] GameObject WeaponSheath;
-
-        private bool WeaponEquip = false;
-        private bool HandWeaponEquip = false;
-        private bool ProjectileFired = false;
-
-        private GameObject[] vectors = new GameObject[3]; // Vector Dot and Cross Product
-        private GameObject ActiveClk; // Clk
-        private float VectorDirection = 0.1f;
-
+        [SerializeField] GameObject WeaponHolder;
+        [SerializeField] GameObject HandWeaponHolder;
+        [SerializeField] GameObject ExtendedSummation;
         private GameObject WeaponInSheath;
         private GameObject WeaponInHand;
 
-        /* Hand Weapon Extended Features */
-        [SerializeField] GameObject ExtendedSummation; // Summation Extension
 
-        /* Special Move - One */
+        private bool WeaponEquip = false;
+        private bool HandWeaponEquip = false;
+
+        /* Shared Melee Attack */
+        private bool KickStarted;
+        private bool PunchStarted;
+        private bool AttackMadeContact;
+
+        /* Player Management */
+        public float health;
+        private float _degrees;
+        public C_Controller opp;
+        private int PlayerNumber;
+        private string PlayerType;
+        private Vector3 P1StartLocation, P2StartLocation;
+
+        /* Shared Cooldown */
+        private bool CoolDown;
+        private float StunEndTime;
+        private float NextJumpTime;
+        private float JumpCoolDownTime = 1.2f;
+        private float NextAttackTime;
+        private float AttackCoolDownTime = 1.0f;
+        private float NextHandWeaponTime;
+        private float HandWeaponTimeOut = 5.0f;
+        private float NextSMOAttackTime;
+
+        /* Jump Management */
+        private bool backwardJump;
+        private bool forwardJump;
+        private bool jump;
+
+        /* EE */
+        [SerializeField] GameObject Clk;
+        private GameObject ActiveClk;
+        private bool ProjectileFired = false;
+        //private float SMOCoolDownTime = ???f;
+
+        /* Math */
         [SerializeField] GameObject VectorLeft;
         [SerializeField] GameObject VectorRight;
-        [SerializeField] GameObject Clk;
+        private GameObject[] vectors = new GameObject[3];
+        private float NextSwordSwing;
+        private float VectorDirection = 0.1f;
+        private float SMOCoolDownTime = 2.5f;
 
-        /* Melee Attack Management */
-        private bool ComboStarted;
-        private int KickPunch = 2; // 0 == Punch, 1 == Kick, 2 == unoccupied
-        private int CurrentComboCount = 0;
-        private int MaxComboCount = 3;
-        private float AcceptedComboInputTime;
 
 #if ENABLE_INPUT_SYSTEM 
         private PlayerInput _playerInput;
@@ -197,11 +195,6 @@ namespace StarterAssets
         private CharacterController _controller;
         private StarterAssetsInputs _input;
         private GameObject _mainCamera;
-
-        /* Particle Management */
-        [SerializeField] ParticleSystem _punchParticleSystem;
-        [SerializeField] ParticleSystem _kickParticleSystem;
-        private ParticleSystem ActiveParticles = null;
 
         private const float _threshold = 0.01f;
 
@@ -218,6 +211,7 @@ namespace StarterAssets
 #endif
             }
         }
+
 
         /* Script Handling */
         private void Awake()
@@ -239,17 +233,11 @@ namespace StarterAssets
             health = MaxHealth;
             _degrees = (NumPlayers == 0 ? FirstPlayerDegrees : SecondPlayerDegrees);
             transform.rotation = Quaternion.Euler(0.0f, _degrees, 0.0f);
-            players[NumPlayers] = this;
-            NumPlayers++;
-            PlayerNumber = NumPlayers;
 
             // Player Opponent Assignment
-            if (NumPlayers == 2)
-            {
-                players[0].opp = players[1];
-                players[1].opp = players[0];
-                SetTimer(RoundLoadTime);
-            }
+            WeaponInSheath = Instantiate(Weapon, WeaponSheath.transform);
+            OpponentAssignment();
+            
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
@@ -267,9 +255,6 @@ namespace StarterAssets
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
 
-            // Weapon Management
-            WeaponInSheath = Instantiate(Weapon, WeaponSheath.transform);
-
             float dist = 3.0f;
             P1StartLocation = new Vector3(_mainCamera.transform.position.x - dist, _mainCamera.transform.position.y - 2, _mainCamera.transform.position.z + 20);
             P2StartLocation = new Vector3(_mainCamera.transform.position.x + dist, _mainCamera.transform.position.y - 2, _mainCamera.transform.position.z + 20);
@@ -277,36 +262,9 @@ namespace StarterAssets
 
         private void Update()
         {
-            // Set Player Type
-            if (Time.time < Timer) {
-                if (WeaponInSheath.name == "Integral(Clone)")
-                {
-                    PlayerType = "Mathematician";
-                }
-                else
-                {
-                    PlayerType = "Electrical Engineer";
-                }
-            }
             _hasAnimator = TryGetComponent(out _animator);
 
-            // Reset for Next Round
-            if (StunEndTime + 1.0f < Time.time && health <= 0.1f)
-            {
-                health = MaxHealth;
-                opp.health = MaxHealth;
-                _animator.SetFloat(_animIDHealth, health);
-                opp._animator.SetFloat(opp._animIDHealth, opp.health);
-                StunEndTime = Time.time + RoundLoadTime;
-                RoundCoolDown = false;
-                SetTimer(RoundLoadTime * 2.0f);
-            }
-
-            if (Time.time < NextAttackTime && !ComboStarted)
-            {
-                _input.punch = false;
-            }
-
+            RoundResetCheck();
 
             if (Time.time < Timer)
             {
@@ -316,94 +274,77 @@ namespace StarterAssets
             }
             else if (Timer < Time.time)
             {
-
                 if (health <= 0.1f)
                 {
                     DisableInput();
                 }
-
-                // Only accept input if the player isn't stunned
-                if (StunEndTime < Time.time)
+                if (StunEndTime < Time.time && !Crouch())
                 {
-                    if (!Crouch())
+                    if (WeaponInHand == null)
                     {
+                        if (PlayerType == "Mathematician")
+                        {
+                            VectorAttack();
+                        }
+                        else if (PlayerType == "Electrical Engineer")
+                        {
+                            ClkAttack();
+                        }
+                    }
 
-                        // Character cannot perform the melee SMO with a weapon in hand
-                        if (WeaponInHand == null) {
-                            if (PlayerType == "Mathematician") {
-                                VectorAttack();
-                            }
-                            else if (PlayerType == "Electrical Engineer")
-                            {
-                                ClkAttack();
-                            }
+                    // Shared
+                    if (HandWeaponEquip && ExtendedSummation != null && NextHandWeaponTime < Time.time + 4.0f && ActiveClk == null)
+                    {
+                        Destroy(WeaponInHand);
+                        WeaponInHand = Instantiate(ExtendedSummation, HandWeaponHolder.transform);
+                        WeaponInHand.tag = (PlayerNumber == 1) ? "Player" : "Player2";
+                        WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
+                    }
+
+                    if (HandWeaponEquip)
+                    {
+                        _input.equipWeapon = false;
+                    }
+
+                    // Equip/Unequip Main Weapon
+                    if (!HandWeaponEquip)
+                    {
+                        EquipWeapon();
+                        JumpAndGravity();
+                        if (NextJumpTime < Time.time && !WeaponEquip)
+                        {
+                            EquipHandWeapon();
                         }
 
-                        // Summation Attack has started
-                        if (HandWeaponEquip && ExtendedSummation != null && NextHandWeaponTime < Time.time + 4.0f && ActiveClk == null)
+                        if (WeaponEquip)
                         {
-                            Destroy(WeaponInHand);
-                            WeaponInHand = Instantiate(ExtendedSummation, HandWeaponHolder.transform);
-                            WeaponInHand.tag = (PlayerNumber == 1) ? "Player" : "Player2";
-                            WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
-                        }
-
-                        if (HandWeaponEquip)
-                        {
-                            _input.equipWeapon = false;
-                        }
-
-                        // Equip/Unequip Main Weapon
-                        
-                        if (!HandWeaponEquip)
-                        {
-                            EquipWeapon();
-                            JumpAndGravity();
-                            if (NextJumpTime < Time.time && !WeaponEquip)
-                            {
-                                EquipHandWeapon();
-                            }
-
-                            if (WeaponEquip)
-                            {
-                                WeaponSwing();
-                                WeaponJab();
-                            }
-                            else {
-                                if (KickPunch != 1)
-                                {
-                                    Punch();
-                                }
-                                if (KickPunch != 0)
-                                {
-                                    Kick();
-                                }
-                            }
+                            WeaponSwing();
+                            WeaponJab();
                         }
                         else
                         {
-                            _input.jump = false;
-                        }
-
-                        _input.punch = false;
-                        _input.kick = false;
-                        _input.equipHandWeapon = false;
-
-                        GroundedCheck();
-
-                        if (NextAttackTime - 0.1f < Time.time && NextHandWeaponTime - 2.5f < Time.time)
-                        {
-                            Move();
+                            Punch();
+                            Kick();
                         }
                     }
                     else
                     {
-                        DisableInput();
+                        _input.jump = false;
+                    }
+
+                    _input.punch = false;
+                    _input.kick = false;
+                    _input.equipHandWeapon = false;
+
+                    if (NextAttackTime - 0.1f < Time.time && NextHandWeaponTime - 2.5f < Time.time)
+                    {
+                        Move();
                     }
                 }
-            } else
-            {
-                DisableInput();
+                else
+                {
+                    DisableInput();
+                }
             }
         }
 
@@ -413,100 +354,20 @@ namespace StarterAssets
 
             if (Timer < Time.time)
             {
-
-                // Player Orientation
-                bool oldSwitchCondition = switchCondition;
-                if (opp != null && PlayerNumber == 1 && opp.transform.position.x < transform.position.x && switchCondition)
-                {
-                    switchCondition = false; // Characters on the wrong side of each other
-                }
-                else if (PlayerNumber == 1 && opp != null && opp.transform.position.x > transform.position.x && !switchCondition)
-                {
-                    switchCondition = true; // Characters on starting side of each other
-                }
-
-                // The characters have switched sides
-                if (opp != null && oldSwitchCondition != switchCondition)
-                {
-                    _degrees = (_degrees == FirstPlayerDegrees ? SecondPlayerDegrees : FirstPlayerDegrees);
-                    opp._degrees = (opp._degrees == FirstPlayerDegrees ? SecondPlayerDegrees : FirstPlayerDegrees);
-                }
-                _animator.SetBool(_animIDAttackCoolDown, (Time.time <= NextAttackTime) || (Time.time <= NextSwordSwing));
+                _animator.SetBool(_animIDAttackCoolDown,
+                                 (Time.time < NextAttackTime - 0.5f)
+                                 || (Time.time < NextSwordSwing));
                 _animator.SetBool(_animIDStun, false);
 
+                Orientation();
 
-                /* Summation Attack Handling */
-                if (ExtendedSummation != null)
-                {
-                    if ((HandWeaponEquip && NextHandWeaponTime - 3.0f < Time.time))
-                    {
-                        // Return a Extended Summation to original model
-                        Destroy(WeaponInHand);
-                        WeaponInHand = Instantiate(HandWeapon, HandWeaponHolder.transform);
-                        WeaponInHand.tag = (PlayerNumber == 1) ? "Player" : "Player2";
-                        _animator.SetBool(_animIDHandWeapon, false);
-                    }
+                SummationAttackHandling();
 
-                    // Get rid of hand weapon after attack
-                    if ((HandWeaponEquip && NextHandWeaponTime - 2.0f < Time.time))
-                    {
-                        HandWeaponEquip = false;
-                        Destroy(WeaponInHand);
-                    }
-                }
+                VectorAttackTrajectory();
 
-                // Vector Attack - Start
-                // Vector Destroy
-                if (NextAttackTime < Time.time && vectors[0] != null)
-                {
-                    Destroy(vectors[0]);
-                    Destroy(vectors[1]);
-                    Destroy(vectors[2]);
-                }
-                // Angled Vectors
-                else if (Time.time < NextAttackTime && vectors[0] != null && (vectors[0].transform.rotation.z > 0.18f || vectors[0].transform.rotation.z < 0.17f))
-                {
-                    vectors[0].transform.position = new Vector3(vectors[0].transform.position.x + VectorDirection, vectors[0].transform.position.y + 0.15f, vectors[0].transform.position.z);
-                    vectors[1].transform.position = new Vector3(vectors[1].transform.position.x + VectorDirection, vectors[1].transform.position.y + 0.15f, vectors[1].transform.position.z);
-                    vectors[2].transform.position = new Vector3(vectors[2].transform.position.x + VectorDirection, vectors[2].transform.position.y + 0.15f, vectors[2].transform.position.z);
-                } 
-                // Normal Vectors
-                else if (Time.time < NextAttackTime && vectors[0] != null && vectors[0].transform.rotation.z < 0.18f && vectors[0].transform.rotation.z > 0.17f)
-                {
-                    vectors[0].transform.position = new Vector3(vectors[0].transform.position.x, vectors[0].transform.position.y + 0.4f, vectors[0].transform.position.z);
-                    vectors[1].transform.position = new Vector3(vectors[1].transform.position.x, vectors[1].transform.position.y + 0.4f, vectors[1].transform.position.z);
-                    vectors[2].transform.position = new Vector3(vectors[2].transform.position.x, vectors[2].transform.position.y + 0.4f, vectors[2].transform.position.z);
+                ClkAttackTrajectory();
 
-                }
-                // Vector Attack - End
-
-
-                // Clk - Start
-                if (NextAttackTime < Time.time && ActiveClk != null)
-                {
-                    Destroy(ActiveClk);
-                }
-                // Clk - End
-
-                if (NextAttackTime - 1.0f < Time.time && _input.smo == true)
-                {
-                    _input.smo = false;
-                    _animator.SetBool(_animIDsmo, false);
-                }
-
-                // EE - Weapon Projectile
-                bool activeSwingAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Swing");
-                bool activeJabAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Jab");
-                if (PlayerType == "Electrical Engineer"
-                        && (activeJabAnimation || activeSwingAnimation)
-                        && !ProjectileFired && NextSwordSwing < Time.time)
-                {
-                    ProjectileFired = true;
-                    NextSwordSwing = Time.time + AttackCoolDownTime;
-                    WeaponInHand.GetComponent<WeaponDamageProjectiles>().switchCondition = switchCondition;
-                    WeaponInHand.GetComponent<WeaponDamageProjectiles>().SetTag((PlayerNumber == 1) ? "Player" : "Player2");
-                    WeaponInHand.GetComponent<WeaponDamageProjectiles>().Attack();
-                }
+                CircuitProjectileAttack();
             }
         }
 
@@ -535,14 +396,68 @@ namespace StarterAssets
         }
 
 
-        /* Character Movement */
+        /* Round Management */
+        public static void ResetSwitchCondiition()
+        {
+            switchCondition = true;
+        }
 
+        public static void ResetRound()
+        {
+            Round = 1;
+        }
+
+        public static void ResetRoundCoolDown()
+        {
+            RoundCoolDown = false;
+        }
+
+        public void SetPlayerNumber(int num)
+        {
+            PlayerNumber = num;
+        }
+
+        private void OpponentAssignment()
+        {
+            if (WeaponInSheath.name == "Integral(Clone)")
+            {
+                PlayerType = "Mathematician";
+            }
+            else
+            {
+                PlayerType = "Electrical Engineer";
+            }
+            players[NumPlayers] = this;
+            NumPlayers++;
+            PlayerNumber = NumPlayers;
+            if (NumPlayers == 2)
+            {
+                players[0].opp = players[1];
+                players[1].opp = players[0];
+                SetTimer(RoundLoadTime);
+            }
+        }
+
+        public void RoundResetCheck()
+        {
+            if (StunEndTime < Time.time && health <= 0.1f)
+            {
+                health = MaxHealth;
+                opp.health = MaxHealth;
+                _animator.SetFloat(_animIDHealth, health);
+                opp._animator.SetFloat(opp._animIDHealth, opp.health);
+
+                RoundCoolDown = false;
+                SetTimer(RoundLoadTime * 2.0f);
+            }
+        }
+
+        /* Character Movement */
         private bool Crouch()
         {
             _animator.SetBool(_animIDCrouch, _input.crouch);
             return _input.crouch;
         }
-
         private void JumpAndGravity()
         {
             // reset the fall timeout timer
@@ -584,7 +499,6 @@ namespace StarterAssets
                 _verticalVelocity += Gravity * Time.deltaTime;
             }
         }
-
         private void DisableInput()
         {
             _input.jump = false;
@@ -600,53 +514,10 @@ namespace StarterAssets
             _speed = 0.0f;
             _animator.SetFloat(_animIDSpeed, _speed);
         }
-
-        public float Degrees
-        {
-            get {
-                return _degrees;
-            }
-            set {
-                _degrees = value;
-            }
-        }
-
-        public void SetPlayerNumber(int num)
-        {
-            PlayerNumber = num;
-        }
-
-        public static void ResetSwitchCondiition()
-        {
-            switchCondition = true;
-        }
-
-        public static void ResetRound()
-        {
-            Round = 1;
-        }
-
-        public static void ResetRoundCoolDown()
-        {
-            RoundCoolDown = false;
-        }
-
-        public static int NumberOfPlayers
-        {
-            get
-            {
-                return NumPlayers;
-            } 
-            set
-            {
-                NumPlayers = value;
-            }
-        }
-
         private void Move()
         {
             // Stop Movement
-            if (Time.time < AcceptedComboInputTime || Time.time < NextAttackTime)
+            if (Time.time < NextAttackTime)
             {
                 _speed = 0.0f;
                 _animator.SetFloat(_animIDSpeed, 0.0f);
@@ -770,167 +641,177 @@ namespace StarterAssets
                 _animator.SetFloat(_animIDSpeed, 0.0f);
             }
         }
+        private void Orientation()
+        {
+            bool oldSwitchCondition = switchCondition;
+            if (opp != null && PlayerNumber == 1 && opp.transform.position.x < transform.position.x && switchCondition)
+            {
+                switchCondition = false; // Characters on the wrong side of each other
+            }
+            else if (PlayerNumber == 1 && opp != null && opp.transform.position.x > transform.position.x && !switchCondition)
+            {
+                switchCondition = true; // Characters on starting side of each other
+            }
+
+            if (opp != null && oldSwitchCondition != switchCondition)
+            {
+                _degrees = (_degrees == FirstPlayerDegrees ? SecondPlayerDegrees : FirstPlayerDegrees);
+                opp._degrees = (opp._degrees == FirstPlayerDegrees ? SecondPlayerDegrees : FirstPlayerDegrees);
+            }
+        }
+        public static int NumberOfPlayers
+        {
+            get
+            {
+                return NumPlayers;
+            }
+            set
+            {
+                NumPlayers = value;
+            }
+        }
+        public float Degrees
+        {
+            get
+            {
+                return _degrees;
+            }
+            set
+            {
+                _degrees = value;
+            }
+        }
 
         /* Hand Attacks */
-
         private void Kick()
         {
-            if (_input.kick && KickPunch != 0)
+            if (_input.kick && !PunchStarted && NextAttackTime < Time.time)
             {
-                if (CurrentComboCount < MaxComboCount)
-                {
-                    KickPunch = 1;
-                    CurrentComboCount++;
-                }
-                if (CurrentComboCount == 1)
-                {
-                    ComboStarted = true;
-                    _animator.SetBool(_animIDKick, true);
-                    _input.kick = false;
-                }
-                else if (CurrentComboCount == 2)
+                if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
                 {
                     _animator.SetBool(_animIDKick, true);
-                    _input.kick = false;
-                }
-                else if (CurrentComboCount >= MaxComboCount)
+                    AttackMadeContact = false;
+                    KickStarted = true;
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                } else
                 {
-                    _animator.SetBool(_animIDKick, true);
-                    _input.kick = false;
+                    AttackMadeContact = false;
                 }
-
-            }
-            else if (!_input.kick && CurrentComboCount == 1 && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
+            } else if (!AttackMadeContact
+                       && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
+                       && _animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
             {
-                ComboStarted = false;
-                CurrentComboCount = 0;
-                KickPunch = 2;
-                _animator.SetBool(_animIDKick, false);
-            }
-            else if (!_input.kick && CurrentComboCount == 2
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Illegal Elbow Punch")
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
-            {
-                ComboStarted = false;
-                CurrentComboCount = 0;
-                KickPunch = 2;
-                _animator.SetBool(_animIDKick, false);
-            }
-            else if (CurrentComboCount >= MaxComboCount
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Illegal Elbow Punch")
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching")
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
-            {
-                ComboStarted = false;
-                CurrentComboCount = 0;
-                KickPunch = 2;
-                _animator.SetBool(_animIDKick, false);
-            }
-
-            if ((_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick") && CurrentComboCount == 1 || ComboStarted)
-                || (_animator.GetCurrentAnimatorStateInfo(0).IsName("Illegal Elbow Punch") && CurrentComboCount == 2)
-                || (_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching") && CurrentComboCount >= MaxComboCount))
-            {
-                ComboStarted = false;
                 float oppX = opp.transform.position.x;
                 float X = transform.position.x;
                 if (System.Math.Abs(oppX - X) <= 2.0f)
                 {
-                    // Punches deal 2^8 damage
-                    opp.TakeDamage(256);
-                }
-                //NextAttackTime = Time.time + AttackCoolDownTime;
-
-                if (CurrentComboCount >= MaxComboCount)
-                {
-                    CurrentComboCount = 0;
-                    KickPunch = 2;
-                    _animator.SetBool(_animIDKick, false);
-                    // Set Attack Time Countdown
-                }
-            }
-        }
-
-        private void Punch()
-        {
-            //NextAttackTime, AttackCoolDoiwnTime, _animator.SetBool(_animIDPunch, true);, _input.punch, CurrentComboCount
-            if (_input.punch && KickPunch != 1)
-            {
-                if (CurrentComboCount < MaxComboCount) {
-                    KickPunch = 0;
-                    CurrentComboCount++;
-                }
-                if (CurrentComboCount == 1)
-                {
-                    ComboStarted = true;
-                    _animator.SetBool(_animIDPunch, true);
-                    _input.punch = false;
-                } else if (CurrentComboCount == 2)
-                {
-                    _animator.SetBool(_animIDPunch, true);
-                    _input.punch = false;
-                } else if (CurrentComboCount >= MaxComboCount)
-                {
-                    _animator.SetBool(_animIDPunch, true);
-                    _input.punch = false;
-                }
-
-            } 
-            else if (!_input.punch && CurrentComboCount == 1 && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
-            {
-                ComboStarted = false;
-                CurrentComboCount = 0;
-                KickPunch = 2;
-                _animator.SetBool(_animIDPunch, false);
-            }
-            else if (!_input.punch && CurrentComboCount == 2 
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Illegal Elbow Punch") 
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
-            {
-                ComboStarted = false;
-                CurrentComboCount = 0;
-                KickPunch = 2;
-                _animator.SetBool(_animIDPunch, false);
-            } 
-            else if (CurrentComboCount >= MaxComboCount 
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Illegal Elbow Punch") 
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching") 
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
-            {
-                ComboStarted = false;
-                CurrentComboCount = 0;
-                KickPunch = 2;
-                _animator.SetBool(_animIDPunch, false);
-            }
-
-            if ((_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching") && CurrentComboCount == 1 || ComboStarted)
-                || (_animator.GetCurrentAnimatorStateInfo(0).IsName("Illegal Elbow Punch") && CurrentComboCount == 2)
-                || (_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick") && CurrentComboCount >= MaxComboCount))
-            {
-                ComboStarted = false;
-                float oppX = opp.transform.position.x;
-                float X = transform.position.x;
-                if (System.Math.Abs(oppX - X) <= 2.0f)
-                {
-                    // Punches deal 2^6 damage
                     opp.TakeDamage(64);
                 }
-                //NextAttackTime = Time.time + AttackCoolDownTime;
-
-                if (CurrentComboCount >= MaxComboCount)
+                _animator.SetBool(_animIDKick, false);
+                AttackMadeContact = true;
+                //KickStarted = false;
+            } else if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
+            {
+                _animator.SetBool(_animIDKick, false);
+            } else if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
+            {
+                KickStarted = false;
+            }
+        }
+        private void Punch()
+        {
+            if (_input.punch && !KickStarted && NextAttackTime < Time.time)
+            {
+                if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
                 {
-                    CurrentComboCount = 0;
-                    KickPunch = 2;
-                    _animator.SetBool(_animIDPunch, false);
-                    // Set Attack Time Countdown
+                    _animator.SetBool(_animIDPunch, true);
+                    AttackMadeContact = false;
+                    PunchStarted = true;
+                    NextAttackTime = Time.time + AttackCoolDownTime;
                 }
+                else
+                {
+                    AttackMadeContact = false;
+                }
+            }
+            else if (!AttackMadeContact
+                     && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
+                     && _animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
+            {
+                float oppX = opp.transform.position.x;
+                float X = transform.position.x;
+                if (System.Math.Abs(oppX - X) <= 2.0f)
+                {
+                    opp.TakeDamage(64);
+                }
+                _animator.SetBool(_animIDPunch, false);
+                AttackMadeContact = true;
+                //PunchStarted = false;
+            }
+            else if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
+            {
+                _animator.SetBool(_animIDPunch, false);
+            }
+            else if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
+            {
+                PunchStarted = false;
             }
         }
 
-
         /* Weapon Attacks */
+        private void EquipHandWeapon()
+        {
+            if (_input.equipHandWeapon
+                && NextHandWeaponTime < Time.time
+                && NextAttackTime < Time.time
+                && !HandWeaponEquip && _input.move == Vector2.zero
+                && ActiveClk == null)
+            {
 
-        /* Equip Primary Weapon for the Character */
+                WeaponInHand = Instantiate(HandWeapon, HandWeaponHolder.transform);
+                WeaponInHand.tag = (PlayerNumber == 1) ? "Player" : "Player2";
+
+                NextAttackTime = Time.time + AttackCoolDownTime;
+                NextHandWeaponTime = Time.time + HandWeaponTimeOut;
+
+                _input.equipHandWeapon = false;
+                _input.move = Vector2.zero;
+                HandWeaponEquip = true;
+                _animator.SetBool(_animIDHandWeapon, true);
+            }
+            else if (Time.time < NextHandWeaponTime - 4.0f)
+            {
+                _input.move = Vector2.zero;
+            }
+            // Default to punch while the hand weapon is cooling down
+            else if (_input.equipHandWeapon && NextAttackTime < Time.time && NextHandWeaponTime - 4.0f <= Time.time && Time.time < NextHandWeaponTime)
+            {
+                _input.punch = true;
+                _input.kick = false;
+            }
+
+        }
+        private void SummationAttackHandling()
+        {
+            if (ExtendedSummation != null)
+            {
+                if ((HandWeaponEquip && NextHandWeaponTime - 3.0f < Time.time))
+                {
+                    // Return a Extended Summation to original model
+                    Destroy(WeaponInHand);
+                    WeaponInHand = Instantiate(HandWeapon, HandWeaponHolder.transform);
+                    WeaponInHand.tag = (PlayerNumber == 1) ? "Player" : "Player2";
+                    _animator.SetBool(_animIDHandWeapon, false);
+                }
+
+                // Get rid of hand weapon after attack
+                if ((HandWeaponEquip && NextHandWeaponTime - 2.0f < Time.time))
+                {
+                    HandWeaponEquip = false;
+                    Destroy(WeaponInHand);
+                }
+            }
+        }
         private void EquipWeapon()
         {
             if (_input.equipWeapon != WeaponEquip && _input.equipWeapon && !HandWeaponEquip) // Pull out weapon 
@@ -949,7 +830,6 @@ namespace StarterAssets
                 _animator.SetBool(_animIDWeapon, WeaponEquip);
             }
         }
-
         private void WeaponSwing()
         {
             bool activeSwingAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Swing");
@@ -975,8 +855,11 @@ namespace StarterAssets
                     }
                 }
                 _input.punch = false;
+            } else if (NextSwordSwing < Time.time && PlayerType == "Mathematician")
+            {
+                WeaponInHand.GetComponent<WeaponDamageHandler>().StopAttack();
             }
-            else
+            else 
             {
                 _animator.SetBool(_animIDPunch, false);
             }
@@ -986,7 +869,6 @@ namespace StarterAssets
                 _input.move = Vector2.zero; // no moving while the animation is active
             }
         }
-
         private void WeaponJab()
         {
             bool activeSwingAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Swing");
@@ -1001,21 +883,19 @@ namespace StarterAssets
                 } else if (PlayerType == "Electrical Engineer" && _input.move == Vector2.zero)
                 {
                     
-                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back") && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run")) {
-                        //NextSwordSwing = Time.time + AttackCoolDownTime;
+                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
+                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run")) {
                         _animator.SetBool(_animIDKick, _input.kick);
                         ProjectileFired = false;
-
-                        /*WeaponInHand.GetComponent<WeaponDamageProjectiles>().switchCondition = switchCondition;
-                        WeaponInHand.GetComponent<WeaponDamageProjectiles>().SetTag((PlayerNumber == 1) ? "Player" : "Player2");
-
-                        WeaponInHand.GetComponent<WeaponDamageProjectiles>().Attack();*/
                     }
                     
                 }
                 _input.kick = false;
             }
-            else
+            else if (NextSwordSwing < Time.time && PlayerType == "Mathematician")
+            {
+                WeaponInHand.GetComponent<WeaponDamageHandler>().StopAttack();
+            } else
             {
                 _animator.SetBool(_animIDKick, false);
             }
@@ -1024,37 +904,6 @@ namespace StarterAssets
             {
                 _input.move = Vector2.zero; // no moving while the animation is active
             }
-        }
-
-
-        /* Quick Hand Weapon Attack - Summation */
-        private void EquipHandWeapon()
-        {
-            if (_input.equipHandWeapon && NextHandWeaponTime < Time.time && NextAttackTime < Time.time && !HandWeaponEquip && _input.move == Vector2.zero && ActiveClk == null)
-            {
-
-                WeaponInHand = Instantiate(HandWeapon, HandWeaponHolder.transform);
-                WeaponInHand.tag = (PlayerNumber == 1) ? "Player" : "Player2";
-
-                NextAttackTime = Time.time + AttackCoolDownTime;
-                NextHandWeaponTime = Time.time + HandWeaponTimeOut;
-
-                _input.equipHandWeapon = false;
-                _input.move = Vector2.zero;
-                HandWeaponEquip = true;
-                _animator.SetBool(_animIDHandWeapon, true);
-            }
-            else if (Time.time < NextHandWeaponTime - 4.0f)
-            {
-                _input.move = Vector2.zero;
-            }
-            // Default to punch while the hand weapon is cooling down
-            else if (_input.equipHandWeapon && NextAttackTime < Time.time && NextHandWeaponTime - 4.0f <= Time.time && Time.time < NextHandWeaponTime)
-            {
-                _input.punch = true;
-                _input.kick = false;
-            }
-
         }
 
         /* Special Attacks */
@@ -1085,19 +934,45 @@ namespace StarterAssets
                 ActiveClk.GetComponent<WeaponDamageHandler>().Attack();
             }
         }
+        private void ClkAttackTrajectory()
+        {
+            if (NextAttackTime < Time.time && ActiveClk != null)
+            {
+                Destroy(ActiveClk);
+            }
+            if (NextAttackTime - 1.0f < Time.time && _input.smo == true)
+            {
+                _input.smo = false;
+                _animator.SetBool(_animIDsmo, false);
+            }
+        }
+        private void CircuitProjectileAttack()
+        {
+            // EE - Weapon Projectile
+            bool activeSwingAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Swing");
+            bool activeJabAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Jab");
+            if (PlayerType == "Electrical Engineer"
+                    && (activeJabAnimation || activeSwingAnimation)
+                    && !ProjectileFired && NextSwordSwing < Time.time)
+            {
+                ProjectileFired = true;
+                NextSwordSwing = Time.time + AttackCoolDownTime;
+                WeaponInHand.GetComponent<WeaponDamageProjectiles>().switchCondition = switchCondition;
+                WeaponInHand.GetComponent<WeaponDamageProjectiles>().SetTag((PlayerNumber == 1) ? "Player" : "Player2");
+                WeaponInHand.GetComponent<WeaponDamageProjectiles>().Attack();
+            }
+        }
         private void VectorAttack()
         {
-            if (NextAttackTime < Time.time)
+            if (NextSMOAttackTime < Time.time)
             {
                 if (_input.smo && NextHandWeaponTime < Time.time)
                 {
-                    NextAttackTime = Time.time + AttackCoolDownTime;
+                    NextSMOAttackTime = Time.time + SMOCoolDownTime;
                     _animator.SetBool(_animIDsmo, true);
                     HandWeaponEquip = false;
                 }
-            }
-
-            if (_animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne") && vectors[0] == null)
+            } else if (_animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne") && vectors[0] == null)
             {
                 // Instantiate Vector depending on Player Direction
 
@@ -1108,7 +983,8 @@ namespace StarterAssets
 
                 float x, y, z;
                 float offsetY, offsetX;
-                if (_input.move != Vector2.zero) // Moving
+
+                if (_speed > 0.2f) // Moving
                 {
                     angleX = 0.0f;
                     angleY = 180.0f;
@@ -1135,6 +1011,9 @@ namespace StarterAssets
                     z = 0.0f;
                     offsetY = 0.0f;
                     offsetX = 0.5f;
+                    _input.move = Vector2.zero;
+                    _speed = 0.0f;
+                    _animator.SetFloat(_animIDSpeed, 0.0f);
                 }
                 if (_degrees == FirstPlayerDegrees) // Left and Right Vector
                 {
@@ -1164,10 +1043,38 @@ namespace StarterAssets
                 }
             }
 
-            if (NextAttackTime < Time.time)
+            if (NextSMOAttackTime < Time.time)
             {
                 _input.smo = false;
                 _animator.SetBool(_animIDsmo, false);
+            }
+        }
+        private void VectorAttackTrajectory()
+        {
+            if (NextSMOAttackTime - 0.5f < Time.time && vectors[0] != null)
+            {
+                Destroy(vectors[0]);
+                Destroy(vectors[1]);
+                Destroy(vectors[2]);
+            }
+            // Angled Vectors
+            else if (Time.time < NextSMOAttackTime
+                    && vectors[0] != null
+                    && (vectors[0].transform.rotation.z > 0.18f || vectors[0].transform.rotation.z < 0.17f))
+            {
+                vectors[0].transform.position = new Vector3(vectors[0].transform.position.x + VectorDirection, vectors[0].transform.position.y + 0.15f, vectors[0].transform.position.z);
+                vectors[1].transform.position = new Vector3(vectors[1].transform.position.x + VectorDirection, vectors[1].transform.position.y + 0.15f, vectors[1].transform.position.z);
+                vectors[2].transform.position = new Vector3(vectors[2].transform.position.x + VectorDirection, vectors[2].transform.position.y + 0.15f, vectors[2].transform.position.z);
+            }
+            // Normal Vectors
+            else if (Time.time < NextSMOAttackTime
+                    && vectors[0] != null
+                    && (vectors[0].transform.rotation.z < 0.18f && vectors[0].transform.rotation.z > 0.17f))
+            {
+                vectors[0].transform.position = new Vector3(vectors[0].transform.position.x, vectors[0].transform.position.y + 0.4f, vectors[0].transform.position.z);
+                vectors[1].transform.position = new Vector3(vectors[1].transform.position.x, vectors[1].transform.position.y + 0.4f, vectors[1].transform.position.z);
+                vectors[2].transform.position = new Vector3(vectors[2].transform.position.x, vectors[2].transform.position.y + 0.4f, vectors[2].transform.position.z);
+
             }
         }
 
@@ -1176,28 +1083,23 @@ namespace StarterAssets
         {
             Timer = Time.time + time;
         }
-
         public float getNextAttackTime()
         {
             return NextAttackTime;
         }
 
-        /* Damage from Attacks */
+        /* Damage Handling */
         public void TakeDamage(float damage)
         {
             // Make sure the player can't take damage while already stunned
-            if (StunEndTime < Time.time && !_input.crouch)
+            if (StunEndTime < Time.time 
+                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Stun")
+                && !_input.crouch)
             {
                 health -= damage;
                 _animator.SetFloat(_animIDHealth, health);
                 _animator.SetBool(_animIDStun, true);
-                StunEndTime = Time.time + 0.35f;
-            }
-            if (opp.getNextAttackTime() > Time.time)
-            {
-                health -= damage;
-                StunEndTime = Time.time + AttackCoolDownTime;
-                _animator.SetFloat(_animIDHealth, health);
+                StunEndTime = Time.time + AttackCoolDownTime + 0.1f;
             }
 
             if (health < 0.1f && !RoundCoolDown)
@@ -1206,22 +1108,14 @@ namespace StarterAssets
                 RoundCoolDown = true;
             }
         }
-
         public float getHealth()
         {
             return health;
         }
-
         public void SetHealth()
         {
             health = MaxHealth;
         }
-
-
-
-
-
-
 
 
 

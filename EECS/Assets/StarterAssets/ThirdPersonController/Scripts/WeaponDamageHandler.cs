@@ -26,11 +26,6 @@ namespace StarterAssets
                 TakeDamage = false;
                 NextAttackTime = Time.time + CoolDownTime;
                 Attacking = false;
-            } else if (opp == null)
-            {
-                TakeDamage = false;
-                Attacking = false;
-                NextAttackTime = Time.time + CoolDownTime;
             }
         }
 
@@ -52,6 +47,11 @@ namespace StarterAssets
         public void Attack()
         {
             Attacking = true;
+        }
+
+        public void StopAttack()
+        {
+            Attacking = false;
         }
     }
 
