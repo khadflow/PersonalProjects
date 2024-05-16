@@ -1,20 +1,24 @@
 TODO
 
 Player 
-1. Fist and Foot Colliders for melee attacks
-(currently, landed attacks are determined by player proximity)
-2. Stun / Stun stumble backwards
-3. New Animations (run, step back, special move, weapon equip/unequip)
-4. Block / Breaker Buster
+1. Block / Breaker Buster
+	Hold button
+2. Movement
+	Punch/Kick Combo
+3. Crouch
+	Attacks
+	Stuns
 
 Weapons
 1. Vectors
 2. 1D, 2D, and 3D Axis
 3. Weapon combo system
+3. Chaining HashMap Trap (Linked List rolls out on the ground and chained linked lists shoot upwards, all of different lengths)
 
 UI
 1. Player Health Bars
 2. Loading Screen
+3. Camera Scroll
 
 Environment
 1. CS184 Shading Room
@@ -28,3 +32,34 @@ Sound
 4. Weapon Combat
 5. Collisions
 6. Announcer voice
+
+Character Models
+1. Software Engineer - The software engineer will be distinctly identified by a gas mask where the character inhales 1s and exhales 0s through the holes in the gas mask.
+2. Electrical Engineer - The electrical engineer will be distinctly defined by an electronic emoji mask whose emojis update based on the current state of the round.
+3. Mathematician - ???
+
+Fixes & Updates
+1. Clk animation
+2. Stun Step back
+3. Punch and Kick Combos
+4. Fist and foot colliders for melee attacks.
+5. Update Animations (run, step back, special move, weapon equip/unequip)
+6. Gamepad and Controller mappings affect both characters using these control schemes at the same time.
+
+
+Unit Testing
+1. Special Move (1)
+2. Summation
+3. Jump (Forward, Inplace, Back) (Hold Button)
+4. Movement
+5. Punch, Kick
+6. Crouch (Forward, Inplace, Back) (Hold Button)
+7. Weapon Attack (Swing, Jab)
+8. Stun
+9. Block (Idle, Weapon Idle, Crouch Idle)
+
+
+
+NOTES
+// See Controller Mappings
+// https://docs.unity3d.com/Manual/ios-handle-game-controller-input.html#InputMapping

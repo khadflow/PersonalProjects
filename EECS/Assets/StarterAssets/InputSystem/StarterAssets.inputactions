@@ -84,12 +84,21 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "SpecialMoveOne",
                     "type": "Button",
                     "id": "29ebb2cc-9f60-48fe-9e9b-6c0b0e22047e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Blocking",
+                    "type": "Button",
+                    "id": "b6221bcd-2432-46bf-bdc7-b00c554748cf",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -109,29 +118,7 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "up",
-                    "id": "bb94b405-58d3-4998-8535-d705c1218a98",
-                    "path": "<Keyboard>/#(W)",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardMouse",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "down",
-                    "id": "929d9071-7dd0-4368-9743-6793bb98087e",
-                    "path": "<Keyboard>/#(S)",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardMouse",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "left",
+                    "name": "Left",
                     "id": "28abadba-06ff-4d37-bb70-af2f1e35a3b9",
                     "path": "<Keyboard>/#(A)",
                     "interactions": "",
@@ -142,8 +129,8 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "right",
-                    "id": "45f115b6-9b4f-4ba8-b500-b94c93bf7d7e",
+                    "name": "Right",
+                    "id": "7077819e-4e8a-45ac-8aac-bffd06583e6f",
                     "path": "<Keyboard>/#(D)",
                     "interactions": "",
                     "processors": "",
@@ -243,7 +230,7 @@
                 {
                     "name": "",
                     "id": "1bd55a0b-761e-4ae4-89ae-8ec127e08a29",
-                    "path": "<Keyboard>/space",
+                    "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
@@ -441,8 +428,8 @@
                 {
                     "name": "",
                     "id": "365693f7-aa4f-48fc-9256-80176b59f4d7",
-                    "path": "<Keyboard>/c",
-                    "interactions": "",
+                    "path": "<Keyboard>/#(S)",
+                    "interactions": "Hold",
                     "processors": "",
                     "groups": "KeyboardMouse",
                     "action": "Crouch",
@@ -452,7 +439,7 @@
                 {
                     "name": "",
                     "id": "58e053aa-0503-405c-8884-abcdedc21f57",
-                    "path": "<Gamepad>/buttonNorth",
+                    "path": "<Joystick>/stick/down",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -501,6 +488,28 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "SpecialMoveOne",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7935580d-fb93-461b-bb16-5f28e80b2515",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "Blocking",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8973b922-4bfb-49e6-bbc5-dcbaf49be013",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Blocking",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

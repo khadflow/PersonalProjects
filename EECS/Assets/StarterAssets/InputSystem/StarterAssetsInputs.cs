@@ -18,6 +18,7 @@ namespace StarterAssets
 		public bool equipWeapon = false;
 		public bool equipHandWeapon = false;
 		public bool smo = false;
+		public bool isBlocking = false;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -34,7 +35,7 @@ namespace StarterAssets
 
 		public void OnLook(InputValue value)
 		{
-			if(cursorInputForLook)
+			if (cursorInputForLook)
 			{
 				LookInput(value.Get<Vector2>());
 			}
@@ -70,17 +71,25 @@ namespace StarterAssets
 			}
 		}
 
-		public void OnCrouch(InputValue value) 
+		public void OnCrouch(InputValue value)
 		{
 			if (value.isPressed) {
 				CrouchToggle();
 			}
 		}
 
-		public void OnSpecialMoveOne(InputValue value) 
+		public void OnSpecialMoveOne(InputValue value)
 		{
 			if (value.isPressed) {
 				SMO();
+			}
+		}
+
+		public void OnBlocking(InputValue value)
+		{
+			if (value.isPressed)
+			{
+				BlockingToggle();
 			}
 		}
 #endif
@@ -129,6 +138,11 @@ namespace StarterAssets
 		private void CrouchToggle()
 		{
 			crouch = !crouch;
+		}
+
+		private void BlockingToggle()
+		{
+			isBlocking = !isBlocking;
 		}
 
 		private void SMO()

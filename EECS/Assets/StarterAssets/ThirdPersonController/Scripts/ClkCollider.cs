@@ -19,11 +19,11 @@ namespace StarterAssets
         // Update is called once per frame
         void Update()
         {
-            float offset = -0.55f;
+            float offset = -1.75f;
 
             if (_degrees == 90.0f || _degrees == 270.0f) {
 
-                clk_collider.center = new Vector3(clk_collider.center.x, clk_collider.center.y, clk_collider.center.z + offset); // = clk_collider.center;// += 0.1f;// = new Vector3(clk_collider.transform.position.x + 0.1f, clk_collider.transform.position.y, clk_collider.transform.position.z);
+                clk_collider.center = new Vector3(clk_collider.center.x, clk_collider.center.y, clk_collider.center.z + offset);
 
             }
         }

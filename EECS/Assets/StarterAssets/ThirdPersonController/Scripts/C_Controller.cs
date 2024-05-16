@@ -129,6 +129,7 @@ namespace StarterAssets
         private int _animIDKick;
         private int _animIDAttackCoolDown;
         private int _animIDHealth;
+        private int _animIDBlock;
 
         /* Shared Weapon Management */
         [SerializeField] GameObject Weapon;
@@ -199,6 +200,9 @@ namespace StarterAssets
         private const float _threshold = 0.01f;
 
         private bool _hasAnimator;
+        private static IDictionary<string, KeyCode> CrouchControlScheme;
+        private static IDictionary<string, KeyCode> JumpControlScheme;
+        private static IDictionary<string, KeyCode> BlockControlScheme;
 
         private bool IsCurrentDeviceMouse
         {
@@ -211,7 +215,6 @@ namespace StarterAssets
 #endif
             }
         }
-
 
         /* Script Handling */
         private void Awake()
@@ -226,8 +229,29 @@ namespace StarterAssets
             {
                 _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             }
-        }
+            
+            CrouchControlScheme = new Dictionary<string, KeyCode>();
+            CrouchControlScheme.Add("KeyboardMouse", KeyCode.S);
+            CrouchControlScheme.Add("Gamepad", KeyCode.JoystickButton6);
+            CrouchControlScheme.Add("Xbox Controller", KeyCode.JoystickButton6);
+            CrouchControlScheme.Add("PS4 Controller", KeyCode.JoystickButton6);
+            CrouchControlScheme.Add("Keyboard", KeyCode.B);
 
+            JumpControlScheme = new Dictionary<string, KeyCode>();
+            JumpControlScheme.Add("KeyboardMouse", KeyCode.W);
+            JumpControlScheme.Add("Gamepad", KeyCode.JoystickButton14);
+            JumpControlScheme.Add("Xbox Controller", KeyCode.JoystickButton14);
+            JumpControlScheme.Add("PS4 Controller", KeyCode.JoystickButton14);
+            JumpControlScheme.Add("Keyboard", KeyCode.J);
+
+            BlockControlScheme = new Dictionary<string, KeyCode>();
+            BlockControlScheme.Add("KeyboardMouse", KeyCode.B);
+            /* TODO - Map Controls */
+            //JumpControlScheme.Add("Gamepad", KeyCode.JoystickButton14);
+            //JumpControlScheme.Add("Xbox Controller", KeyCode.JoystickButton14);
+            //JumpControlScheme.Add("PS4 Controller", KeyCode.JoystickButton14);
+            //JumpControlScheme.Add("Keyboard", KeyCode.J);
+        }
         private void Start()
         {
             health = MaxHealth;
@@ -259,7 +283,6 @@ namespace StarterAssets
             P1StartLocation = new Vector3(_mainCamera.transform.position.x - dist, _mainCamera.transform.position.y - 2, _mainCamera.transform.position.z + 20);
             P2StartLocation = new Vector3(_mainCamera.transform.position.x + dist, _mainCamera.transform.position.y - 2, _mainCamera.transform.position.z + 20);
         }
-
         private void Update()
         {
             _hasAnimator = TryGetComponent(out _animator);
@@ -278,6 +301,8 @@ namespace StarterAssets
                 {
                     DisableInput();
                 }
+
+                Block();
                 if (StunEndTime < Time.time && !Crouch())
                 {
                     if (WeaponInHand == null)
@@ -340,14 +365,21 @@ namespace StarterAssets
                     {
                         Move();
                     }
-                }
-                else
+                } else if (Crouch())
                 {
-                    DisableInput();
+                    _input.jump = false;
+                    _input.punch = false;
+                    _input.kick = false;
+                    _input.smo = false;
+                    Move();
+                    EquipWeapon();
                 }
             }
+            else
+            {
+                DisableInput();
+            }
         }
-
         private void LateUpdate()
         {
             CameraRotation();
@@ -370,7 +402,6 @@ namespace StarterAssets
                 CircuitProjectileAttack();
             }
         }
-
         private void AssignAnimationIDs()
         {
             _animIDSpeed = Animator.StringToHash("Speed");
@@ -390,6 +421,7 @@ namespace StarterAssets
             _animIDHandWeapon = Animator.StringToHash("HandWeapon");
             _animIDCrouch = Animator.StringToHash("Crouch");
             _animIDsmo = Animator.StringToHash("SMO");
+            _animIDBlock = Animator.StringToHash("Block");
 
             _animator.SetFloat(_animIDHealth, health);
             _animator.SetBool(_animIDStun, false);
@@ -401,22 +433,18 @@ namespace StarterAssets
         {
             switchCondition = true;
         }
-
         public static void ResetRound()
         {
             Round = 1;
         }
-
         public static void ResetRoundCoolDown()
         {
             RoundCoolDown = false;
         }
-
         public void SetPlayerNumber(int num)
         {
             PlayerNumber = num;
         }
-
         private void OpponentAssignment()
         {
             if (WeaponInSheath.name == "Integral(Clone)")
@@ -437,7 +465,6 @@ namespace StarterAssets
                 SetTimer(RoundLoadTime);
             }
         }
-
         public void RoundResetCheck()
         {
             if (StunEndTime < Time.time && health <= 0.1f)
@@ -455,6 +482,10 @@ namespace StarterAssets
         /* Character Movement */
         private bool Crouch()
         {
+            KeyCode value;
+            CrouchControlScheme.TryGetValue(_playerInput.currentControlScheme, out value);
+            bool keyDown = Input.GetKey(value);
+            _input.crouch = keyDown;
             _animator.SetBool(_animIDCrouch, _input.crouch);
             return _input.crouch;
         }
@@ -516,7 +547,6 @@ namespace StarterAssets
         }
         private void Move()
         {
-            // Stop Movement
             if (Time.time < NextAttackTime)
             {
                 _speed = 0.0f;
@@ -595,21 +625,21 @@ namespace StarterAssets
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
 
-            /* Player Jump Input*/
+            /* Player Directional Jump Input */
 
-            // The direction the player is going in will dictate what type of jump
-            
-            jump = (_input.jump && !CoolDown);
+            KeyCode value;
+            JumpControlScheme.TryGetValue(_playerInput.currentControlScheme, out value);
+            bool keyDown = Input.GetKey(value);
+
+            jump = ((_input.jump || keyDown) && !CoolDown && !_input.crouch);
             backwardJump = ((direction == 1) ? (jump && _input.move.x < 0.0f) : (jump && _input.move.x > 0.0f)) && _speed > 0.0f;
             forwardJump = ((direction == 1) ? (jump && _input.move.x > 0.0f) : (jump && _input.move.x < 0.0f)) && _speed > 0.0f;
             jump = jump && !backwardJump && !forwardJump && _input.move == Vector2.zero;
 
             _animator.SetBool(_animIDStepBack, (direction == 1) ? (_input.move.x < 0.0f) : (_input.move.x > 0.0f));
 
-
             if (jump && !backwardJump && !forwardJump)
             {
-                // Jump if CoolDown is Over
                 _animator.SetBool(_animIDJumping, jump);
             }
             else if (backwardJump && !jump && !forwardJump)
@@ -622,7 +652,6 @@ namespace StarterAssets
             }
             else if (CoolDown)
             {
-                // Stop all jump animation during CoolDown
                 _animator.SetBool(_animIDJumping, false);
                 _animator.SetBool(_animIDBackwardJump, false);
                 _animator.SetBool(_animIDForwardJump, false);
@@ -635,7 +664,6 @@ namespace StarterAssets
             if (_hasAnimator && Timer < Time.time)
             {
                 _animator.SetFloat(_animIDSpeed, System.Math.Min(_animationBlend, _speed));
-                //_animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
             } else if (Time.time < Timer)
             {
                 _animator.SetFloat(_animIDSpeed, 0.0f);
@@ -683,6 +711,14 @@ namespace StarterAssets
         }
 
         /* Hand Attacks */
+        private void Block()
+        {
+            KeyCode value;
+            BlockControlScheme.TryGetValue(_playerInput.currentControlScheme, out value);
+            bool keyDown = Input.GetKey(value);
+            _input.isBlocking = _input.isBlocking && keyDown; 
+            _animator.SetBool(_animIDBlock, _input.isBlocking);
+        }
         private void Kick()
         {
             if (_input.kick && !PunchStarted && NextAttackTime < Time.time)
@@ -701,15 +737,10 @@ namespace StarterAssets
                        && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
                        && _animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
             {
-                float oppX = opp.transform.position.x;
-                float X = transform.position.x;
-                if (System.Math.Abs(oppX - X) <= 2.0f)
-                {
-                    opp.TakeDamage(64);
-                }
+                opp.TakeDamage(64);
+      
                 _animator.SetBool(_animIDKick, false);
                 AttackMadeContact = true;
-                //KickStarted = false;
             } else if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
             {
                 _animator.SetBool(_animIDKick, false);
@@ -738,15 +769,10 @@ namespace StarterAssets
                      && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
                      && _animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
             {
-                float oppX = opp.transform.position.x;
-                float X = transform.position.x;
-                if (System.Math.Abs(oppX - X) <= 2.0f)
-                {
-                    opp.TakeDamage(64);
-                }
+                opp.TakeDamage(64);
+                
                 _animator.SetBool(_animIDPunch, false);
                 AttackMadeContact = true;
-                //PunchStarted = false;
             }
             else if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
             {
@@ -909,7 +935,6 @@ namespace StarterAssets
         /* Special Attacks */
         private void ClkAttack()
         {
-            // !_animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne")
             if (NextAttackTime < Time.time)
             {
                 if (_input.smo & NextHandWeaponTime < Time.time)
@@ -922,7 +947,7 @@ namespace StarterAssets
 
             if (_animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne") && ActiveClk == null)
             {
-                ActiveClk = Instantiate(Clk, new Vector3(transform.position.x + (_degrees == FirstPlayerDegrees ? 2.0f : -2.0f), transform.position.y + 1.0f, transform.position.z), Quaternion.Euler(0.0f, -_degrees, 0.0f));
+                ActiveClk = Instantiate(Clk, new Vector3(transform.position.x, transform.position.y + 1.0f, transform.position.z), Quaternion.Euler(0.0f, -_degrees, 0.0f));
 
                 ActiveClk.GetComponent<ClkCollider>().setDegrees(_degrees);
                 ActiveClk.tag = (PlayerNumber == 1) ? "Player" : "Player2";
@@ -1091,15 +1116,29 @@ namespace StarterAssets
         /* Damage Handling */
         public void TakeDamage(float damage)
         {
-            // Make sure the player can't take damage while already stunned
-            if (StunEndTime < Time.time 
-                && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Stun")
-                && !_input.crouch)
+            float oppX = opp.transform.position.x;
+            float X = transform.position.x;
+            if (System.Math.Abs(oppX - X) <= 1.5f)
             {
-                health -= damage;
-                _animator.SetFloat(_animIDHealth, health);
-                _animator.SetBool(_animIDStun, true);
-                StunEndTime = Time.time + AttackCoolDownTime + 0.1f;
+                // The player can't take damage while already stunned
+                if (StunEndTime < Time.time
+                    && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Stun")
+                    && !_input.crouch
+                    && !_input.isBlocking)
+                {
+                    health -= damage;
+                    _animator.SetFloat(_animIDHealth, health);
+                    _animator.SetBool(_animIDStun, true);
+                    StunEndTime = Time.time + AttackCoolDownTime + 0.1f;
+
+                    // step back
+                    transform.position = new Vector3(transform.position.x - (_degrees == 90.0f ? 0.1f : -0.1f), transform.position.y, transform.position.z);
+
+                    /*Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+                    _controller.Move(targetDirection.normalized * (0.1f * Time.deltaTime) +
+                              new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+                     */
+                }
             }
 
             if (health < 0.1f && !RoundCoolDown)
@@ -1117,11 +1156,6 @@ namespace StarterAssets
             health = MaxHealth;
         }
 
-
-
-
-
-
         /* Starter Asset Functions - Start */
         private void GroundedCheck()
         {
@@ -1137,7 +1171,6 @@ namespace StarterAssets
                 _animator.SetBool(_animIDGrounded, Grounded);
             }
         }
-
         private void CameraRotation()
         {
             // if there is an input and camera position is not fixed
@@ -1158,14 +1191,12 @@ namespace StarterAssets
             CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
                 _cinemachineTargetYaw, 0.0f);
         }
-
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
         {
             if (lfAngle < -360f) lfAngle += 360f;
             if (lfAngle > 360f) lfAngle -= 360f;
             return Mathf.Clamp(lfAngle, lfMin, lfMax);
         }
-
         private void OnDrawGizmosSelected()
         {
             Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
@@ -1179,7 +1210,6 @@ namespace StarterAssets
                 new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z),
                 GroundedRadius);
         }
-
         private void OnFootstep(AnimationEvent animationEvent)
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f)
@@ -1191,7 +1221,6 @@ namespace StarterAssets
                 }
             }
         }
-
         private void OnLand(AnimationEvent animationEvent)
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f)
