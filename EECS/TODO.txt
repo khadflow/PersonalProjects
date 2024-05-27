@@ -9,7 +9,7 @@ Player
 	Attacks
 	Stuns
 
-Weapons
+Weapons & Attacks
 1. Vectors
 2. 1D, 2D, and 3D Axis
 3. Weapon combo system
@@ -39,18 +39,19 @@ Character Models
 3. Mathematician - ???
 
 Fixes & Updates
-1. Clk animation
+1. Clk animation (Done)
 2. Stun Step back
 3. Punch and Kick Combos
 4. Fist and foot colliders for melee attacks.
-5. Update Animations (run, step back, special move, weapon equip/unequip)
+5. Update Animations (run, step back, special move, weapon equip/unequip, blocking to run/stepback/idle, stun animation plays regardless of opponent's current animation (run, walk, idle, weapon equip, )
 6. Gamepad and Controller mappings affect both characters using these control schemes at the same time.
+7. Occasional Jumps without player jumping in the air (Caused by upward flicks of the left analog stick in Gamepad controller)
 
 
 Unit Testing
 1. Special Move (1)
 2. Summation
-3. Jump (Forward, Inplace, Back) (Hold Button)
+3. Jump (Forward, Inplace, Back) (Hold Button / Flick Analog Stick)
 4. Movement
 5. Punch, Kick
 6. Crouch (Forward, Inplace, Back) (Hold Button)
@@ -58,6 +59,29 @@ Unit Testing
 8. Stun
 9. Block (Idle, Weapon Idle, Crouch Idle)
 
+
+Gamepad Controls
+
+Gamepad/Xbox/Playstation Controller Mapping
+	Kick (B)
+	Punch (X)
+	Jump (Left Analog ==> Up)
+	Move (Left Analog ==> Left/Right)
+	Equip Weapon (Left Button)
+	Summation / Hand Weapon (Right Bumper)
+	SMO (Left Trigger)
+	Blocking (Hold Right Trigger)
+	Crouch (Hold Left Stick Down)
+Keyboard Controller Mapping
+	Kick (K)
+	Punch (P)
+	Jump (W)
+	Move (A/D)
+	Equip Weapon (I)
+	Summation / Hand Weapon (H)
+	SMO (U)
+	Blocking (B)
+	Crouch (S)
 
 
 NOTES

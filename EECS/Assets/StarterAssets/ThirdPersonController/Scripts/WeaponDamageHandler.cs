@@ -22,7 +22,7 @@ namespace StarterAssets
             C_Controller opp = opponent.GetComponent<C_Controller>();
             if (Attacking && TakeDamage && NextAttackTime < Time.time && opp != null)
             {
-                opp.TakeDamage(1);
+                opp.TakeDamage(1, true);
                 TakeDamage = false;
                 NextAttackTime = Time.time + CoolDownTime;
                 Attacking = false;

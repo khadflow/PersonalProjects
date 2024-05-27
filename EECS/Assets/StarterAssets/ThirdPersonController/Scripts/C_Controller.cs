@@ -149,6 +149,7 @@ namespace StarterAssets
         private bool KickStarted;
         private bool PunchStarted;
         private bool AttackMadeContact;
+        private float MoveCap = 2.5f;
 
         /* Player Management */
         public float health;
@@ -162,7 +163,7 @@ namespace StarterAssets
         private bool CoolDown;
         private float StunEndTime;
         private float NextJumpTime;
-        private float JumpCoolDownTime = 1.2f;
+        private float JumpCoolDownTime = 1.3f;
         private float NextAttackTime;
         private float AttackCoolDownTime = 1.0f;
         private float NextHandWeaponTime;
@@ -235,22 +236,18 @@ namespace StarterAssets
             CrouchControlScheme.Add("Gamepad", KeyCode.JoystickButton6);
             CrouchControlScheme.Add("Xbox Controller", KeyCode.JoystickButton6);
             CrouchControlScheme.Add("PS4 Controller", KeyCode.JoystickButton6);
-            CrouchControlScheme.Add("Keyboard", KeyCode.B);
 
             JumpControlScheme = new Dictionary<string, KeyCode>();
             JumpControlScheme.Add("KeyboardMouse", KeyCode.W);
             JumpControlScheme.Add("Gamepad", KeyCode.JoystickButton14);
             JumpControlScheme.Add("Xbox Controller", KeyCode.JoystickButton14);
             JumpControlScheme.Add("PS4 Controller", KeyCode.JoystickButton14);
-            JumpControlScheme.Add("Keyboard", KeyCode.J);
 
             BlockControlScheme = new Dictionary<string, KeyCode>();
             BlockControlScheme.Add("KeyboardMouse", KeyCode.B);
-            /* TODO - Map Controls */
-            //JumpControlScheme.Add("Gamepad", KeyCode.JoystickButton14);
-            //JumpControlScheme.Add("Xbox Controller", KeyCode.JoystickButton14);
-            //JumpControlScheme.Add("PS4 Controller", KeyCode.JoystickButton14);
-            //JumpControlScheme.Add("Keyboard", KeyCode.J);
+            BlockControlScheme.Add("Gamepad", KeyCode.JoystickButton11);
+            BlockControlScheme.Add("Xbox Controller", KeyCode.JoystickButton11);
+            BlockControlScheme.Add("PS4 Controller", KeyCode.JoystickButton11);
         }
         private void Start()
         {
@@ -302,9 +299,9 @@ namespace StarterAssets
                     DisableInput();
                 }
 
-                Block();
-                if (StunEndTime < Time.time && !Crouch())
+                if (StunEndTime < Time.time && !Crouch() && !Block())
                 {
+                    MoveCap = 2.5f;
                     if (WeaponInHand == null)
                     {
                         if (PlayerType == "Mathematician")
@@ -367,11 +364,21 @@ namespace StarterAssets
                     }
                 } else if (Crouch())
                 {
+                    // reduce speed while crouching
+                    MoveCap = 1.5f;
                     _input.jump = false;
                     _input.punch = false;
                     _input.kick = false;
                     _input.smo = false;
                     Move();
+                    EquipWeapon();
+                }
+                else if (Block())
+                {
+                    _input.jump = false;
+                    _input.punch = false;
+                    _input.kick = false;
+                    _input.smo = false;
                     EquipWeapon();
                 }
             }
@@ -482,13 +489,12 @@ namespace StarterAssets
         /* Character Movement */
         private bool Crouch()
         {
-            KeyCode value;
-            CrouchControlScheme.TryGetValue(_playerInput.currentControlScheme, out value);
-            bool keyDown = Input.GetKey(value);
-            _input.crouch = keyDown;
+            bool keyDown = (System.Math.Floor(_playerInput.actions["Crouch"].ReadValue<float>()) == 1);
+            _input.crouch = _input.crouch && keyDown;
             _animator.SetBool(_animIDCrouch, _input.crouch);
             return _input.crouch;
         }
+
         private void JumpAndGravity()
         {
             // reset the fall timeout timer
@@ -498,7 +504,7 @@ namespace StarterAssets
             {
                 CoolDown = false;
                 _animator.SetBool(_animIDCoolDown, CoolDown);
-                if ((jump && _input.move == Vector2.zero && _animator.GetCurrentAnimatorStateInfo(0).IsName("Jump"))
+                if ((jump && _animator.GetCurrentAnimatorStateInfo(0).IsName("Jump"))
                         || (forwardJump && _animator.GetCurrentAnimatorStateInfo(0).IsName("ForwardFlip"))
                         || (backwardJump && _animator.GetCurrentAnimatorStateInfo(0).IsName("Backflip")))
                 {
@@ -514,8 +520,14 @@ namespace StarterAssets
                     {
                         _jumpTimeoutDelta -= Time.deltaTime;
                     }
-                    _input.jump = false;
                 }
+                _input.jump = false;
+                jump = false;
+                forwardJump = false;
+                backwardJump = false;
+                _animator.SetBool(_animIDJumping, false);
+                _animator.SetBool(_animIDBackwardJump, false);
+                _animator.SetBool(_animIDForwardJump, false);
             }
             else
             {
@@ -593,7 +605,7 @@ namespace StarterAssets
                 _speed = targetSpeed;
             }
 
-            _speed = System.Math.Min(_speed, 2.5f);
+            _speed = System.Math.Min(_speed, MoveCap);
             if (Time.time < NextJumpTime - 0.5f)
             {
                 _speed *= (0.9f);
@@ -624,38 +636,41 @@ namespace StarterAssets
 
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
-
             /* Player Directional Jump Input */
-
             KeyCode value;
             JumpControlScheme.TryGetValue(_playerInput.currentControlScheme, out value);
-            bool keyDown = Input.GetKey(value);
+            bool keyDown = Input.GetKey(value) || (System.Math.Floor(_playerInput.actions["Jump"].ReadValue<float>()) == 1);
+
+            bool stepBack = (direction == 1) ? (_input.move.x < 0.0f) : (_input.move.x > 0.0f);
+            _animator.SetBool(_animIDStepBack, stepBack);
 
             jump = ((_input.jump || keyDown) && !CoolDown && !_input.crouch);
-            backwardJump = ((direction == 1) ? (jump && _input.move.x < 0.0f) : (jump && _input.move.x > 0.0f)) && _speed > 0.0f;
-            forwardJump = ((direction == 1) ? (jump && _input.move.x > 0.0f) : (jump && _input.move.x < 0.0f)) && _speed > 0.0f;
+            backwardJump = (((direction == 1) ? (jump && _input.move.x < 0.0f) : (jump && _input.move.x > 0.0f))) && stepBack && _speed > 0.0f;
+            forwardJump = (((direction == 1) ? (jump && _input.move.x > 0.0f) : (jump && _input.move.x < 0.0f))) && !stepBack && _speed > 0.0f;
             jump = jump && !backwardJump && !forwardJump && _input.move == Vector2.zero;
 
-            _animator.SetBool(_animIDStepBack, (direction == 1) ? (_input.move.x < 0.0f) : (_input.move.x > 0.0f));
-
-            if (jump && !backwardJump && !forwardJump)
+            if (NextJumpTime < Time.time)
             {
-                _animator.SetBool(_animIDJumping, jump);
-            }
-            else if (backwardJump && !jump && !forwardJump)
-            {
-                _animator.SetBool(_animIDBackwardJump, backwardJump);
-            }
-            else if (forwardJump && !jump && !backwardJump)
-            {
-                _animator.SetBool(_animIDForwardJump, forwardJump);
-            }
-            else if (CoolDown)
+                if (jump && !backwardJump && !forwardJump)
+                {
+                    _animator.SetBool(_animIDJumping, jump);
+                }
+                else if (backwardJump && !jump && !forwardJump)
+                {
+                    _animator.SetBool(_animIDBackwardJump, backwardJump);
+                }
+                else if (forwardJump && !jump && !backwardJump)
+                {
+                    _animator.SetBool(_animIDForwardJump, forwardJump);
+                }
+            } else
             {
                 _animator.SetBool(_animIDJumping, false);
                 _animator.SetBool(_animIDBackwardJump, false);
                 _animator.SetBool(_animIDForwardJump, false);
+            
             }
+           
 
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
                              new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
@@ -711,13 +726,12 @@ namespace StarterAssets
         }
 
         /* Hand Attacks */
-        private void Block()
+        private bool Block()
         {
-            KeyCode value;
-            BlockControlScheme.TryGetValue(_playerInput.currentControlScheme, out value);
-            bool keyDown = Input.GetKey(value);
-            _input.isBlocking = _input.isBlocking && keyDown; 
+            bool keyDown = (System.Math.Floor(_playerInput.actions["Blocking"].ReadValue<float>()) == 1);
+            _input.isBlocking = _input.isBlocking && keyDown;
             _animator.SetBool(_animIDBlock, _input.isBlocking);
+            return _input.isBlocking;
         }
         private void Kick()
         {
@@ -737,7 +751,7 @@ namespace StarterAssets
                        && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
                        && _animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
             {
-                opp.TakeDamage(64);
+                opp.TakeDamage(64, false);
       
                 _animator.SetBool(_animIDKick, false);
                 AttackMadeContact = true;
@@ -769,7 +783,7 @@ namespace StarterAssets
                      && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
                      && _animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
             {
-                opp.TakeDamage(64);
+                opp.TakeDamage(64, false);
                 
                 _animator.SetBool(_animIDPunch, false);
                 AttackMadeContact = true;
@@ -1040,7 +1054,7 @@ namespace StarterAssets
                     _speed = 0.0f;
                     _animator.SetFloat(_animIDSpeed, 0.0f);
                 }
-                if (_degrees == FirstPlayerDegrees) // Left and Right Vector
+                if (_degrees == FirstPlayerDegrees)
                 {
                     vectors[0] = Instantiate(VectorLeft, new Vector3(transform.position.x + x, y, z), Quaternion.Euler(angleX, angleY, angleZ));
                     vectors[0].GetComponent<WeaponDamageHandler>().Attack();
@@ -1051,17 +1065,17 @@ namespace StarterAssets
                     vectors[2] = Instantiate(VectorLeft, new Vector3(transform.position.x + x + 2.0f * offsetX, y - 2.0f * offsetY, z), Quaternion.Euler(angleX, angleY, angleZ));
                     vectors[2].GetComponent<WeaponDamageHandler>().Attack();
 
-                    VectorDirection = 0.2f;
+                    VectorDirection = 0.3f;
                 }
                 else
-                {                            // Normal Vectors
-                    vectors[0] = Instantiate(VectorRight, new Vector3(transform.position.x - x, y, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
+                {
+                    vectors[0] = Instantiate(VectorRight, new Vector3(transform.position.x - 1.0f - x, y, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
                     vectors[0].GetComponent<WeaponDamageHandler>().Attack();
 
-                    vectors[1] = Instantiate(VectorRight, new Vector3(transform.position.x - x - offsetX, y - offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
+                    vectors[1] = Instantiate(VectorRight, new Vector3(transform.position.x - 1.0f - x - offsetX, y - offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
                     vectors[1].GetComponent<WeaponDamageHandler>().Attack();
 
-                    vectors[2] = Instantiate(VectorRight, new Vector3(transform.position.x - x - 2.0f * offsetX, y - 2.0f * offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
+                    vectors[2] = Instantiate(VectorRight, new Vector3(transform.position.x - 1.0f - x - 2.0f * offsetX, y - 2.0f * offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
                     vectors[2].GetComponent<WeaponDamageHandler>().Attack();
 
                     VectorDirection = -0.2f;
@@ -1087,19 +1101,20 @@ namespace StarterAssets
                     && vectors[0] != null
                     && (vectors[0].transform.rotation.z > 0.18f || vectors[0].transform.rotation.z < 0.17f))
             {
-                vectors[0].transform.position = new Vector3(vectors[0].transform.position.x + VectorDirection, vectors[0].transform.position.y + 0.15f, vectors[0].transform.position.z);
-                vectors[1].transform.position = new Vector3(vectors[1].transform.position.x + VectorDirection, vectors[1].transform.position.y + 0.15f, vectors[1].transform.position.z);
-                vectors[2].transform.position = new Vector3(vectors[2].transform.position.x + VectorDirection, vectors[2].transform.position.y + 0.15f, vectors[2].transform.position.z);
+                float angle = 0.25f;
+                vectors[0].transform.position = new Vector3(vectors[0].transform.position.x + VectorDirection, vectors[0].transform.position.y + angle, vectors[0].transform.position.z);
+                vectors[1].transform.position = new Vector3(vectors[1].transform.position.x + VectorDirection, vectors[1].transform.position.y + angle, vectors[1].transform.position.z);
+                vectors[2].transform.position = new Vector3(vectors[2].transform.position.x + VectorDirection, vectors[2].transform.position.y + angle, vectors[2].transform.position.z);
             }
             // Normal Vectors
             else if (Time.time < NextSMOAttackTime
                     && vectors[0] != null
                     && (vectors[0].transform.rotation.z < 0.18f && vectors[0].transform.rotation.z > 0.17f))
             {
-                vectors[0].transform.position = new Vector3(vectors[0].transform.position.x, vectors[0].transform.position.y + 0.4f, vectors[0].transform.position.z);
-                vectors[1].transform.position = new Vector3(vectors[1].transform.position.x, vectors[1].transform.position.y + 0.4f, vectors[1].transform.position.z);
-                vectors[2].transform.position = new Vector3(vectors[2].transform.position.x, vectors[2].transform.position.y + 0.4f, vectors[2].transform.position.z);
-
+                float upward = 0.8f;
+                vectors[0].transform.position = new Vector3(vectors[0].transform.position.x, vectors[0].transform.position.y + upward, vectors[0].transform.position.z);
+                vectors[1].transform.position = new Vector3(vectors[1].transform.position.x, vectors[1].transform.position.y + upward, vectors[1].transform.position.z);
+                vectors[2].transform.position = new Vector3(vectors[2].transform.position.x, vectors[2].transform.position.y + upward, vectors[2].transform.position.z);
             }
         }
 
@@ -1114,11 +1129,11 @@ namespace StarterAssets
         }
 
         /* Damage Handling */
-        public void TakeDamage(float damage)
+        public void TakeDamage(float damage, bool smo)
         {
             float oppX = opp.transform.position.x;
             float X = transform.position.x;
-            if (System.Math.Abs(oppX - X) <= 1.5f)
+            if (System.Math.Abs(oppX - X) <= 1.5f || smo)
             {
                 // The player can't take damage while already stunned
                 if (StunEndTime < Time.time
@@ -1132,12 +1147,16 @@ namespace StarterAssets
                     StunEndTime = Time.time + AttackCoolDownTime + 0.1f;
 
                     // step back
-                    transform.position = new Vector3(transform.position.x - (_degrees == 90.0f ? 0.1f : -0.1f), transform.position.y, transform.position.z);
+                    /*while (Time.time < StunEndTime)
+                    {
 
-                    /*Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+                        Move();
+                    }*/
+                    /*transform.position = new Vector3(transform.position.x - (_degrees == 90.0f ? 0.1f : -0.1f), transform.position.y, transform.position.z);
+                    
+                    Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
                     _controller.Move(targetDirection.normalized * (0.1f * Time.deltaTime) +
-                              new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
-                     */
+                              new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);*/
                 }
             }
 
