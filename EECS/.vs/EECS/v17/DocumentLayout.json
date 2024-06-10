@@ -7,6 +7,10 @@
       "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\thirdpersoncontroller\\scripts\\c_controller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|c:\\users\\khadi\\unityprojects\\personalprojects\\eecs\\assets\\starterassets\\thirdpersoncontroller\\scripts\\playerselect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\thirdpersoncontroller\\scripts\\playerselect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|C:\\Users\\khadi\\UnityProjects\\PersonalProjects\\EECS\\assets\\starterassets\\thirdpersoncontroller\\scripts\\weapondamagehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\thirdpersoncontroller\\scripts\\weapondamagehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -32,7 +36,7 @@
               "RelativeDocumentMoniker": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
               "ToolTip": "C:\\Users\\khadi\\UnityProjects\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
               "RelativeToolTip": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
-              "ViewState": "AQIAAHQEAAAAAAAAAAAlwOwBAAAZAAAA",
+              "ViewState": "AQIAAH8BAAAAAAAAAAAswIMBAAANAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-01-09T04:00:53.618Z",
               "IsPinned": true,
@@ -40,7 +44,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "WeaponDamageProjectilesHandler.cs",
               "DocumentMoniker": "C:\\Users\\khadi\\UnityProjects\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\WeaponDamageProjectilesHandler.cs",
               "RelativeDocumentMoniker": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\WeaponDamageProjectilesHandler.cs",
@@ -53,7 +57,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "WeaponDamageHandler.cs",
               "DocumentMoniker": "C:\\Users\\khadi\\UnityProjects\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\WeaponDamageHandler.cs",
               "RelativeDocumentMoniker": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\WeaponDamageHandler.cs",
@@ -63,6 +67,19 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-02T00:11:24.943Z",
               "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PlayerSelect.cs",
+              "DocumentMoniker": "C:\\Users\\khadi\\UnityProjects\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSelect.cs",
+              "RelativeDocumentMoniker": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSelect.cs",
+              "ToolTip": "C:\\Users\\khadi\\UnityProjects\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSelect.cs",
+              "RelativeToolTip": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSelect.cs",
+              "ViewState": "AQIAAEUAAAAAAAAAAAAawFEAAABFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-10T03:08:21.338Z",
+              "EditorCaption": ""
             }
           ]
         }

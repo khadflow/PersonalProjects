@@ -504,9 +504,9 @@ namespace StarterAssets
             {
                 CoolDown = false;
                 _animator.SetBool(_animIDCoolDown, CoolDown);
-                if ((jump && _animator.GetCurrentAnimatorStateInfo(0).IsName("Jump"))
-                        || (forwardJump && _animator.GetCurrentAnimatorStateInfo(0).IsName("ForwardFlip"))
-                        || (backwardJump && _animator.GetCurrentAnimatorStateInfo(0).IsName("Backflip")))
+                if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Jump")
+                 || _animator.GetCurrentAnimatorStateInfo(0).IsName("ForwardFlip")
+                 || _animator.GetCurrentAnimatorStateInfo(0).IsName("Backflip"))
                 {
                     NextJumpTime = Time.time + JumpCoolDownTime;
 
@@ -528,13 +528,6 @@ namespace StarterAssets
                 _animator.SetBool(_animIDJumping, false);
                 _animator.SetBool(_animIDBackwardJump, false);
                 _animator.SetBool(_animIDForwardJump, false);
-            }
-            else
-            {
-                _input.jump = false;
-                jump = false;
-                forwardJump = false;
-                backwardJump = false;
             }
 
             if (_verticalVelocity < _terminalVelocity)
@@ -651,18 +644,9 @@ namespace StarterAssets
 
             if (NextJumpTime < Time.time)
             {
-                if (jump && !backwardJump && !forwardJump)
-                {
-                    _animator.SetBool(_animIDJumping, jump);
-                }
-                else if (backwardJump && !jump && !forwardJump)
-                {
-                    _animator.SetBool(_animIDBackwardJump, backwardJump);
-                }
-                else if (forwardJump && !jump && !backwardJump)
-                {
-                    _animator.SetBool(_animIDForwardJump, forwardJump);
-                }
+                _animator.SetBool(_animIDJumping, jump);
+                _animator.SetBool(_animIDBackwardJump, backwardJump);
+                _animator.SetBool(_animIDForwardJump, forwardJump);
             } else
             {
                 _animator.SetBool(_animIDJumping, false);
@@ -1145,18 +1129,6 @@ namespace StarterAssets
                     _animator.SetFloat(_animIDHealth, health);
                     _animator.SetBool(_animIDStun, true);
                     StunEndTime = Time.time + AttackCoolDownTime + 0.1f;
-
-                    // step back
-                    /*while (Time.time < StunEndTime)
-                    {
-
-                        Move();
-                    }*/
-                    /*transform.position = new Vector3(transform.position.x - (_degrees == 90.0f ? 0.1f : -0.1f), transform.position.y, transform.position.z);
-                    
-                    Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
-                    _controller.Move(targetDirection.normalized * (0.1f * Time.deltaTime) +
-                              new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);*/
                 }
             }
 
