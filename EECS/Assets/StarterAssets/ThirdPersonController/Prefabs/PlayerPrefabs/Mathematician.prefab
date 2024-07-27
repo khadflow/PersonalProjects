@@ -1489,6 +1489,8 @@ MonoBehaviour:
   HandWeaponHolder: {fileID: 1219663414673098854}
   ExtendedSummation: {fileID: 2024269770038562643, guid: 45d8411ab778da54dab8aa4236490bb0, type: 3}
   health: 4096
+  p1: {fileID: 4367380429028985185, guid: c292042e408c090418a643b7b0a1b6e8, type: 3}
+  p2: {fileID: 4546666060732229450, guid: 73a9decb89829f741b1915102e152a7a, type: 3}
   opp: {fileID: 0}
   Clk: {fileID: 2778127902144690485, guid: 8d135678c7f8e004bb28ea18efcd4720, type: 3}
   VectorLeft: {fileID: 7132434877189537764, guid: 53f4b3220a8e66648934d3f3a57c9d14, type: 3}

@@ -256,6 +256,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5684591743104850996, guid: dba7016f83fb05f4fb79e272ab819269, type: 3}
+      propertyPath: HealthBarOne
+      value: 
+      objectReference: {fileID: 1192362389189173053, guid: c292042e408c090418a643b7b0a1b6e8, type: 3}
+    - target: {fileID: 5684591743104850996, guid: dba7016f83fb05f4fb79e272ab819269, type: 3}
+      propertyPath: HealthBarTwo
+      value: 
+      objectReference: {fileID: 3749546165137773513, guid: 73a9decb89829f741b1915102e152a7a, type: 3}
+    - target: {fileID: 5684591743104850996, guid: dba7016f83fb05f4fb79e272ab819269, type: 3}
       propertyPath: PlayerSelectButtons.Array.data[2]
       value: 
       objectReference: {fileID: 889133388}

@@ -147,6 +147,7 @@ namespace StarterAssets
                 C_Controller.ResetSwitchCondiition();
                 C_Controller.ResetRoundCoolDown();
                 Round.SetActive(true);
+
                 tmp = Round.GetComponent<TextMeshProUGUI>();
                 tmp.text = "Round " + C_Controller.Round.ToString();
                 ActiveGame = true;

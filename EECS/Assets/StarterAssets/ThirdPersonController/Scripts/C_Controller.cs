@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine.Rendering;
+using Unity.VisualScripting;
+using UnityEngine.UI;
 
 
 #if ENABLE_INPUT_SYSTEM
@@ -153,6 +155,10 @@ namespace StarterAssets
 
         /* Player Management */
         public float health;
+        private Canvas ph;
+        public Canvas p1;
+        public Canvas p2;
+
         private float _degrees;
         public C_Controller opp;
         private int PlayerNumber;
@@ -258,7 +264,9 @@ namespace StarterAssets
             // Player Opponent Assignment
             WeaponInSheath = Instantiate(Weapon, WeaponSheath.transform);
             OpponentAssignment();
-            
+
+            HealthBarAssignment();
+
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
@@ -464,12 +472,23 @@ namespace StarterAssets
             }
             players[NumPlayers] = this;
             NumPlayers++;
-            PlayerNumber = NumPlayers;
+            SetPlayerNumber(NumPlayers);
             if (NumPlayers == 2)
             {
                 players[0].opp = players[1];
                 players[1].opp = players[0];
                 SetTimer(RoundLoadTime);
+            }
+        }
+
+        public void HealthBarAssignment()
+        {
+            if (PlayerNumber == 1)
+            {
+                ph = Instantiate(p1);
+            } else
+            {
+                ph = Instantiate(p2);
             }
         }
         public void RoundResetCheck()
@@ -483,6 +502,10 @@ namespace StarterAssets
 
                 RoundCoolDown = false;
                 SetTimer(RoundLoadTime * 2.0f);
+
+                // Reset Player Health
+                GameObject.FindGameObjectWithTag("PlayerOneHealth").GetComponent<PlayerHealth>().SetHealth(MaxHealth);
+                GameObject.FindGameObjectWithTag("PlayerTwoHealth").GetComponent<PlayerHealth>().SetHealth(MaxHealth);
             }
         }
 
@@ -735,7 +758,7 @@ namespace StarterAssets
                        && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
                        && _animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
             {
-                opp.TakeDamage(64, false);
+                opp.TakeDamage(512, false);
       
                 _animator.SetBool(_animIDKick, false);
                 AttackMadeContact = true;
@@ -767,7 +790,7 @@ namespace StarterAssets
                      && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
                      && _animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
             {
-                opp.TakeDamage(64, false);
+                opp.TakeDamage(256, false);
                 
                 _animator.SetBool(_animIDPunch, false);
                 AttackMadeContact = true;
@@ -1007,37 +1030,19 @@ namespace StarterAssets
                 float x, y, z;
                 float offsetY, offsetX;
 
-                if (_speed > 0.2f) // Moving
-                {
-                    angleX = 0.0f;
-                    angleY = 180.0f;
-                    angleZ = 72.0f;
-                    angle = 180.0f;
-                    x = -2.0f;
-                    y = -2.0f;
-                    z = 0.0f;
-                    offsetY = 0.5f;
-                    offsetX = 0.0f;
-                    _input.move = Vector2.zero;
-                    _speed = 0.0f;
-                    _animator.SetFloat(_animIDSpeed, 0.0f);
-
-                }
-                else // Not Moving
-                {
-                    angleX = 0.0f;
-                    angleY = 0.0f;
-                    angleZ = 20.0f;
-                    angle = 0.0f;
-                    x = 1.0f;
-                    y = -4.0f;
-                    z = 0.0f;
-                    offsetY = 0.0f;
-                    offsetX = 0.5f;
-                    _input.move = Vector2.zero;
-                    _speed = 0.0f;
-                    _animator.SetFloat(_animIDSpeed, 0.0f);
-                }
+                angleX = 0.0f;
+                angleY = 0.0f;
+                angleZ = 20.0f;
+                angle = 0.0f;
+                x = 1.0f;
+                y = -4.0f;
+                z = 0.0f;
+                offsetY = 0.0f;
+                offsetX = 0.5f;
+                _input.move = Vector2.zero;
+                _speed = 0.0f;
+                _animator.SetFloat(_animIDSpeed, 0.0f);
+               
                 if (_degrees == FirstPlayerDegrees)
                 {
                     vectors[0] = Instantiate(VectorLeft, new Vector3(transform.position.x + x, y, z), Quaternion.Euler(angleX, angleY, angleZ));
@@ -1053,13 +1058,13 @@ namespace StarterAssets
                 }
                 else
                 {
-                    vectors[0] = Instantiate(VectorRight, new Vector3(transform.position.x - 1.0f - x, y, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
+                    vectors[0] = Instantiate(VectorRight, new Vector3(transform.position.x - 1.0f, y, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
                     vectors[0].GetComponent<WeaponDamageHandler>().Attack();
 
-                    vectors[1] = Instantiate(VectorRight, new Vector3(transform.position.x - 1.0f - x - offsetX, y - offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
+                    vectors[1] = Instantiate(VectorRight, new Vector3(transform.position.x - 1.0f - offsetX, y - offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
                     vectors[1].GetComponent<WeaponDamageHandler>().Attack();
 
-                    vectors[2] = Instantiate(VectorRight, new Vector3(transform.position.x - 1.0f - x - 2.0f * offsetX, y - 2.0f * offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
+                    vectors[2] = Instantiate(VectorRight, new Vector3(transform.position.x - 1.0f - 2.0f * offsetX, y - 2.0f * offsetY, z), Quaternion.Euler(angleX, angleY - angle, angleZ));
                     vectors[2].GetComponent<WeaponDamageHandler>().Attack();
 
                     VectorDirection = -0.2f;
@@ -1137,6 +1142,14 @@ namespace StarterAssets
                 Round++;
                 RoundCoolDown = true;
             }
+            if (PlayerNumber == 2)
+            {
+                GameObject.FindGameObjectWithTag("PlayerTwoHealth").GetComponent<PlayerHealth>().SetHealth(health);
+            } else
+            {
+                GameObject.FindGameObjectWithTag("PlayerOneHealth").GetComponent<PlayerHealth>().SetHealth(health);
+            }
+            
         }
         public float getHealth()
         {
@@ -1145,6 +1158,11 @@ namespace StarterAssets
         public void SetHealth()
         {
             health = MaxHealth;
+        }
+
+        public static float GetMaxHealth()
+        {
+            return MaxHealth;
         }
 
         /* Starter Asset Functions - Start */

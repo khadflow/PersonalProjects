@@ -9,6 +9,8 @@ TagManager:
   - Holder
   - Player2
   - Vector
+  - PlayerTwoHealth
+  - PlayerOneHealth
   layers:
   - Default
   - TransparentFX
