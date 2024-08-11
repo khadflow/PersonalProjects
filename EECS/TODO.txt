@@ -2,12 +2,18 @@ TODO
 
 Player 
 1. Block / Breaker Buster
-	Hold button
+	Hold button (Done)
 2. Movement
 	Punch/Kick Combo
 3. Crouch
 	Attacks
+		Assign 'Y' 'X' 'B'
+		Assign RB LT RT(Block specific to crouch)
 	Stuns
+4. Weapon Attacks
+	Assign 'Y'
+	Assign LT
+	Assign RB
 
 Weapons & Attacks
 1. Vectors
@@ -16,9 +22,13 @@ Weapons & Attacks
 4. Chaining HashMap Trap (Linked List rolls out on the ground and chained linked lists shoot upwards, all of different lengths)
 
 UI
-1. Player Health Bars
+1. Player Health Bars (Done)
+	Player Name Under Health Bar
+	CS inspired Health bar sprite
 2. Loading Screen
 3. Camera Scroll
+4. Player Select with pictures of characters
+5. Controller UI interaction
 
 Environment
 1. CS184 Shading Room
@@ -38,6 +48,13 @@ Character Models
 1. Software Engineer - The software engineer will be distinctly identified by a gas mask where the character inhales 1s and exhales 0s through the holes in the gas mask.
 2. Electrical Engineer - The electrical engineer will be distinctly defined by an electronic emoji mask whose emojis update based on the current state of the round.
 3. Mathematician - ???
+
+Material
+1. Integral, Clk, Summation
+2. Character Robe
+
+Add Ons
+1. Unique Robe for Characters
 
 Fixes & Updates
 1. Clk animation (Updated)
