@@ -129,6 +129,8 @@ namespace StarterAssets
         private int _animIDWeapon;
         private int _animIDPunch;
         private int _animIDKick;
+        private int _animIDJab;
+        private int _animIDHit;
         private int _animIDAttackCoolDown;
         private int _animIDHealth;
         private int _animIDBlock;
@@ -150,6 +152,8 @@ namespace StarterAssets
         /* Shared Melee Attack */
         private bool KickStarted;
         private bool PunchStarted;
+        private bool JabStarted;
+        private bool HitStarted;
         private bool AttackMadeContact;
         private float MoveCap = 2.5f;
 
@@ -322,7 +326,7 @@ namespace StarterAssets
                         }
                     }
 
-                    // Shared
+                    // Shared - Destroy Summation after use
                     if (HandWeaponEquip && ExtendedSummation != null && NextHandWeaponTime < Time.time + 4.0f && ActiveClk == null)
                     {
                         Destroy(WeaponInHand);
@@ -331,10 +335,10 @@ namespace StarterAssets
                         WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
                     }
 
-                    if (HandWeaponEquip)
+                    /*if (HandWeaponEquip)
                     {
                         _input.equipWeapon = false;
-                    }
+                    }*/
 
                     // Equip/Unequip Main Weapon
                     if (!HandWeaponEquip)
@@ -348,13 +352,20 @@ namespace StarterAssets
 
                         if (WeaponEquip)
                         {
-                            WeaponSwing();
-                            WeaponJab();
+                            WeaponP();
+                            WeaponK();
+                            WeaponJ();
+                            WeaponH();
+
+                            WeaponSMO();
+                            WeaponHW();
                         }
                         else
                         {
-                            Punch();
-                            Kick();
+                            Punch(); // West
+                            Kick(); // East
+                            Jab(); // North
+                            Hit(); // South
                         }
                     }
                     else
@@ -364,6 +375,8 @@ namespace StarterAssets
 
                     _input.punch = false;
                     _input.kick = false;
+                    _input.jab = false;
+                    _input.hit = false;
                     _input.equipHandWeapon = false;
 
                     if (NextAttackTime - 0.1f < Time.time && NextHandWeaponTime - 2.5f < Time.time)
@@ -377,6 +390,8 @@ namespace StarterAssets
                     _input.jump = false;
                     _input.punch = false;
                     _input.kick = false;
+                    _input.jab = false;
+                    _input.hit = false;
                     _input.smo = false;
                     Move();
                     EquipWeapon();
@@ -385,6 +400,8 @@ namespace StarterAssets
                 {
                     _input.jump = false;
                     _input.punch = false;
+                    _input.jab = false;
+                    _input.hit = false;
                     _input.kick = false;
                     _input.smo = false;
                     EquipWeapon();
@@ -429,6 +446,8 @@ namespace StarterAssets
             _animIDStepBack = Animator.StringToHash("StepBack");
             _animIDPunch = Animator.StringToHash("Punching");
             _animIDKick = Animator.StringToHash("Kicking");
+            _animIDJab = Animator.StringToHash("Jabing");
+            _animIDHit = Animator.StringToHash("Hit");
             _animIDAttackCoolDown = Animator.StringToHash("AttackCoolDown");
             _animIDHealth = Animator.StringToHash("Health");
             _animIDStun = Animator.StringToHash("Stun");
@@ -566,6 +585,10 @@ namespace StarterAssets
             _animator.SetBool(_animIDPunch, false);
             _input.kick = false;
             _animator.SetBool(_animIDKick, false);
+            _input.jab = false;
+            _animator.SetBool(_animIDJab, false);
+            _input.hit = false;
+            _animator.SetBool(_animIDHit, false);
             _input.smo = false;
             _animator.SetBool(_animIDsmo, false);
             _input.equipWeapon = WeaponEquip;
@@ -742,7 +765,7 @@ namespace StarterAssets
         }
         private void Kick()
         {
-            if (_input.kick && !PunchStarted && NextAttackTime < Time.time)
+            if (_input.kick && !PunchStarted && !JabStarted && !HitStarted && NextAttackTime < Time.time)
             {
                 if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick"))
                 {
@@ -772,7 +795,7 @@ namespace StarterAssets
         }
         private void Punch()
         {
-            if (_input.punch && !KickStarted && NextAttackTime < Time.time)
+            if (_input.punch && !KickStarted && !JabStarted && !HitStarted && NextAttackTime < Time.time)
             {
                 if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
                 {
@@ -802,6 +825,76 @@ namespace StarterAssets
             else if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching"))
             {
                 PunchStarted = false;
+            }
+        }
+
+        private void Jab()
+        {
+            if (_input.jab && !KickStarted && !PunchStarted && !HitStarted && NextAttackTime < Time.time)
+            {
+                if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Jab"))
+                {
+                    _animator.SetBool(_animIDJab, true);
+                    AttackMadeContact = false;
+                    JabStarted = true;
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                }
+                else
+                {
+                    AttackMadeContact = false;
+                }
+            }
+            else if (!AttackMadeContact
+                     && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
+                     && _animator.GetCurrentAnimatorStateInfo(0).IsName("Jab"))
+            {
+                opp.TakeDamage(256, false);
+
+                _animator.SetBool(_animIDJab, false);
+                AttackMadeContact = true;
+            }
+            else if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Jab"))
+            {
+                _animator.SetBool(_animIDJab, false);
+            }
+            else if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Jab"))
+            {
+                JabStarted = false;
+            }
+        }
+
+        private void Hit()
+        {
+            if (_input.hit && !KickStarted && !PunchStarted && !JabStarted && NextAttackTime < Time.time)
+            {
+                if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
+                {
+                    _animator.SetBool(_animIDHit, true);
+                    AttackMadeContact = false;
+                    HitStarted = true;
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                }
+                else
+                {
+                    AttackMadeContact = false;
+                }
+            }
+            else if (!AttackMadeContact
+                     && Time.time < NextAttackTime + (AttackCoolDownTime / 2.0f)
+                     && _animator.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
+            {
+                opp.TakeDamage(256, false);
+
+                _animator.SetBool(_animIDHit, false);
+                AttackMadeContact = true;
+            }
+            else if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
+            {
+                _animator.SetBool(_animIDHit, false);
+            }
+            else if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
+            {
+                HitStarted = false;
             }
         }
 
@@ -835,6 +928,8 @@ namespace StarterAssets
             {
                 _input.punch = true;
                 _input.kick = false;
+                _input.jab = false;
+                _input.hit = false;
             }
 
         }
@@ -861,7 +956,7 @@ namespace StarterAssets
         }
         private void EquipWeapon()
         {
-            if (_input.equipWeapon != WeaponEquip && _input.equipWeapon && !HandWeaponEquip) // Pull out weapon 
+            if (_input.equipWeapon != WeaponEquip && _input.equipWeapon && !HandWeaponEquip && NextSwordSwing < Time.time) // Pull out weapon 
             {
                 WeaponEquip = true;
                 Destroy(WeaponInSheath);
@@ -869,26 +964,27 @@ namespace StarterAssets
                 _animator.SetBool(_animIDWeapon, WeaponEquip);
                 WeaponInHand.tag = (PlayerNumber == 1) ? "Player" : "Player2";
             }
-            else if (_input.equipWeapon != WeaponEquip && !_input.equipWeapon) // Put weapon away
+            else if (_input.equipWeapon != WeaponEquip && !_input.equipWeapon && NextSwordSwing < Time.time) // Put weapon away
             {
                 WeaponEquip = false;
                 Destroy(WeaponInHand);
                 WeaponInSheath = Instantiate(Weapon, WeaponSheath.transform);
                 _animator.SetBool(_animIDWeapon, WeaponEquip);
+            } else
+            {
+                _input.equipWeapon = WeaponEquip;
             }
         }
-        private void WeaponSwing()
+        private void WeaponP()
         {
-            bool activeSwingAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Swing");
-            bool activeJabAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Jab");
-            if (NextSwordSwing < Time.time && _input.punch && !activeSwingAnimation && !activeJabAnimation)
+            if (NextSwordSwing < Time.time && _input.punch)
             {
                 _input.move = Vector2.zero;
                 
                 if (PlayerType == "Mathematician")
                 {
                     _animator.SetBool(_animIDPunch, _input.punch);
-                    NextSwordSwing = Time.time + AttackCoolDownTime;
+                    NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
                     WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
                 }
                 else if (PlayerType == "Electrical Engineer")
@@ -916,15 +1012,13 @@ namespace StarterAssets
                 _input.move = Vector2.zero; // no moving while the animation is active
             }
         }
-        private void WeaponJab()
+        private void WeaponK()
         {
-            bool activeSwingAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Swing");
-            bool activeJabAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Jab");
-            if (NextSwordSwing < Time.time && _input.kick && !activeJabAnimation && !activeSwingAnimation)
+            if (NextSwordSwing < Time.time && _input.kick)
             {
                 _input.move = Vector2.zero;
                 if (PlayerType == "Mathematician") {
-                    NextSwordSwing = Time.time + AttackCoolDownTime;
+                    NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
                     _animator.SetBool(_animIDKick, _input.kick);
                     WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
                 } else if (PlayerType == "Electrical Engineer" && _input.move == Vector2.zero)
@@ -948,6 +1042,162 @@ namespace StarterAssets
             }
 
             if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Jab"))
+            {
+                _input.move = Vector2.zero; // no moving while the animation is active
+            }
+        }
+
+        private void WeaponJ()
+        {
+            if (NextSwordSwing < Time.time && _input.jab)
+            {
+                _input.move = Vector2.zero;
+                if (PlayerType == "Mathematician")
+                {
+                    NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
+                    _animator.SetBool(_animIDJab, _input.jab);
+                    WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
+                }
+                else if (PlayerType == "Electrical Engineer" && _input.move == Vector2.zero)
+                {
+
+                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
+                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run"))
+                    {
+                        _animator.SetBool(_animIDJab, _input.jab);
+                        ProjectileFired = false;
+                    }
+
+                }
+                _input.jab = false;
+            }
+            else if (NextSwordSwing < Time.time && PlayerType == "Mathematician")
+            {
+                WeaponInHand.GetComponent<WeaponDamageHandler>().StopAttack();
+            }
+            else
+            {
+                _animator.SetBool(_animIDJab, false);
+            }
+
+            if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Jab"))
+            {
+                _input.move = Vector2.zero; // no moving while the animation is active
+            }
+        }
+
+        private void WeaponH()
+        {
+            if (NextSwordSwing < Time.time && _input.hit)
+            {
+                _input.move = Vector2.zero;
+
+                if (PlayerType == "Mathematician")
+                {
+                    _animator.SetBool(_animIDHit, _input.hit);
+                    NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
+                    WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
+                }
+                else if (PlayerType == "Electrical Engineer")
+                {
+                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
+                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run"))
+                    {
+                        _animator.SetBool(_animIDHit, _input.hit);
+
+                        ProjectileFired = false;
+                    }
+                }
+                _input.hit = false;
+            }
+            else if (NextSwordSwing < Time.time && PlayerType == "Mathematician")
+            {
+                WeaponInHand.GetComponent<WeaponDamageHandler>().StopAttack();
+            }
+            else
+            {
+                _animator.SetBool(_animIDHit, false);
+            }
+
+            if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Swing"))
+            {
+                _input.move = Vector2.zero; // no moving while the animation is active
+            }
+        }
+
+        private void WeaponSMO()
+        {
+            if (NextSwordSwing < Time.time && _input.smo)
+            {
+                _input.move = Vector2.zero;
+
+                if (PlayerType == "Mathematician")
+                {
+                    _animator.SetBool(_animIDsmo, _input.smo);
+                    NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
+                    WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
+                }
+                else if (PlayerType == "Electrical Engineer")
+                {
+                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
+                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run"))
+                    {
+                        _animator.SetBool(_animIDsmo, _input.smo);
+
+                        ProjectileFired = false;
+                    }
+                }
+                _input.punch = false;
+            }
+            else if (NextSwordSwing < Time.time && PlayerType == "Mathematician")
+            {
+                WeaponInHand.GetComponent<WeaponDamageHandler>().StopAttack();
+            }
+            else
+            {
+                _animator.SetBool(_animIDsmo, false);
+            }
+
+            if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Swing"))
+            {
+                _input.move = Vector2.zero; // no moving while the animation is active
+            }
+        }
+
+        private void WeaponHW()
+        {
+            if (NextSwordSwing < Time.time && _input.equipHandWeapon)
+            {
+                _input.move = Vector2.zero;
+
+                if (PlayerType == "Mathematician")
+                {
+                    _animator.SetBool(_animIDHandWeapon, _input.equipHandWeapon);
+                    NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
+                    WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
+                }
+                else if (PlayerType == "Electrical Engineer")
+                {
+                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
+                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run"))
+                    {
+                        _animator.SetBool(_animIDHandWeapon, _input.equipHandWeapon);
+
+                        ProjectileFired = false;
+                    }
+                }
+                _input.punch = false;
+            }
+            else if (NextSwordSwing < Time.time && PlayerType == "Mathematician")
+            {
+                WeaponInHand.GetComponent<WeaponDamageHandler>().StopAttack();
+            }
+            else
+            {
+                _animator.SetBool(_animIDHandWeapon, false);
+            }
+
+            if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Swing"))
             {
                 _input.move = Vector2.zero; // no moving while the animation is active
             }
@@ -994,18 +1244,24 @@ namespace StarterAssets
         }
         private void CircuitProjectileAttack()
         {
-            // EE - Weapon Projectile
-            bool activeSwingAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Swing");
-            bool activeJabAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("Jab");
-            if (PlayerType == "Electrical Engineer"
-                    && (activeJabAnimation || activeSwingAnimation)
-                    && !ProjectileFired && NextSwordSwing < Time.time)
-            {
-                ProjectileFired = true;
-                NextSwordSwing = Time.time + AttackCoolDownTime;
-                WeaponInHand.GetComponent<WeaponDamageProjectiles>().switchCondition = switchCondition;
-                WeaponInHand.GetComponent<WeaponDamageProjectiles>().SetTag((PlayerNumber == 1) ? "Player" : "Player2");
-                WeaponInHand.GetComponent<WeaponDamageProjectiles>().Attack();
+            if (PlayerType == "Electrical Engineer") {
+                // EE - Weapon Projectile
+                bool activeOneAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack1");
+                bool activeTwoAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack2");
+                bool activeThreeAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack3");
+                bool activeHWAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttackHW");
+                bool activeSMOAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne");
+                bool activeHAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttackH");
+                if ((activeOneAnimation || activeTwoAnimation || activeThreeAnimation
+                     || activeHWAnimation || activeSMOAnimation || activeHAnimation)
+                     && !ProjectileFired && NextSwordSwing < Time.time)
+                { 
+                    ProjectileFired = true;
+                    NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
+                    WeaponInHand.GetComponent<WeaponDamageProjectiles>().switchCondition = switchCondition;
+                    WeaponInHand.GetComponent<WeaponDamageProjectiles>().SetTag((PlayerNumber == 1) ? "Player" : "Player2");
+                    WeaponInHand.GetComponent<WeaponDamageProjectiles>().Attack();
+                }
             }
         }
         private void VectorAttack()

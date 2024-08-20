@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|c:\\users\\khadi\\unity\\personalprojects\\eecs\\assets\\starterassets\\thirdpersoncontroller\\scripts\\c_controller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\thirdpersoncontroller\\scripts\\c_controller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\assets\\starterassets\\inputsystem\\starterassetsinputs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\inputsystem\\starterassetsinputs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,14 +19,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "C_Controller.cs",
-              "DocumentMoniker": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
-              "RelativeDocumentMoniker": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
-              "ToolTip": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
-              "RelativeToolTip": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
-              "ViewState": "AQIAAHgBAAAAAAAAAAAmwHsBAAAnAAAA",
+              "Title": "StarterAssetsInputs.cs",
+              "DocumentMoniker": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\InputSystem\\StarterAssetsInputs.cs",
+              "RelativeDocumentMoniker": "Assets\\StarterAssets\\InputSystem\\StarterAssetsInputs.cs",
+              "ToolTip": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\InputSystem\\StarterAssetsInputs.cs",
+              "RelativeToolTip": "Assets\\StarterAssets\\InputSystem\\StarterAssetsInputs.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAEYAAAAPAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-01-09T04:00:53.618Z",
+              "WhenOpened": "2024-08-19T04:20:53.11Z",
               "EditorCaption": ""
             }
           ]

@@ -7,13 +7,19 @@ Player
 	Punch/Kick Combo
 3. Crouch
 	Attacks
-		Assign 'Y' 'X' 'B'
+		Assign 'Y' 'X' 'B' 'A'
 		Assign RB LT RT(Block specific to crouch)
 	Stuns
+	Crouch
 4. Weapon Attacks
-	Assign 'Y'
-	Assign LT
-	Assign RB
+	Assign 'Y' (Done - Weapon Equip/Unequip)
+	Assign LT (Done - Weapon Equip/Unequip)
+	Assign RB (Done - Weapon Equip/Unequip)
+	Assign 'A' (Done - Weapon Equip/Unequip)
+5. Advanced Attack animations for two players
+6. All Roads Lead back to "Stun"
+	Once the animators have been rounded out, it is important that a successful attack
+	landed by the player at any state will cause the opponent to fall into the stun state.
 
 Weapons & Attacks
 1. Vectors
@@ -23,12 +29,13 @@ Weapons & Attacks
 
 UI
 1. Player Health Bars (Done)
-	Player Name Under Health Bar
-	CS inspired Health bar sprite
+	Player Name Under Health Bar (IP)
+	CS inspired Health bar sprite (IP)
 2. Loading Screen
 3. Camera Scroll
 4. Player Select with pictures of characters
 5. Controller UI interaction
+6. Pause Screen
 
 Environment
 1. CS184 Shading Room
@@ -70,35 +77,44 @@ Unit Testing
 2. Summation
 3. Jump (Forward, Inplace, Back) (Tap or Hold Button / Flick or Hold Analog Stick)
 4. Movement
-5. Punch, Kick
-6. Crouch (Forward, Inplace, Back) (Hold Button)
-7. Weapon Attack (Swing, Jab)
+5. Punch, Kick, Jab, Hit (Weapon Equip / Weapon Unequip)
+6. Crouch (Forward, Inplace, Back) (Hold Button/Analog Stick)
+7. Weapon Attack (Punch, Kick, Jab, Hit buttons)
 8. Stun
-9. Block (Idle, Weapon Idle, Crouch Idle)
+9. Block (Idle, Weapon Idle)
 
 
 Gamepad Controls
+WE = Attack Possible While Weapon Equip
+WU = Attack possible While Weapon Unequip
+MP = Movement Possible while in this state
 
 Gamepad/Xbox/Playstation Controller Mapping
-	Kick (B)
-	Punch (X)
-	Jump (Left Analog ==> Up)
+	Kick (B) - WE/WU
+	Punch (X) - WE/WU
+	Hit (A) - WE/WU
+	Jab (Y) - WE/WU
+	Jump (Left Analog ==> Up) - MP
 	Move (Left Analog ==> Left/Right)
 	Equip Weapon (Left Button)
-	Summation / Hand Weapon (Right Bumper)
-	SMO (Left Trigger)
+	Summation / Hand Weapon (Right Bumper) - WE/WU
+	SMO (Left Trigger) - WE/WU
 	Blocking (Hold Right Trigger)
-	Crouch (Hold Left Stick Down)
+	Crouch (Hold Left Stick Down) - MP
+
+
 Keyboard Controller Mapping
-	Kick (K)
-	Punch (P)
-	Jump (W)
+	Kick (K) - WE/WU
+	Punch (P) - WE/WU
+	Hit (L) - WE/WU
+	Jab (J) - WE/WU
+	Jump (W) - MP
 	Move (A/D)
 	Equip Weapon (I)
-	Summation / Hand Weapon (H)
-	SMO (U)
+	Summation / Hand Weapon (H) - WE/WU
+	SMO (U) - WE/WU
 	Blocking (B)
-	Crouch (S)
+	Crouch (S) - MP
 
 
 NOTES

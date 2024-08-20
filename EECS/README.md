@@ -19,17 +19,27 @@ Software Engineer
 (Powers)-> TBD
 
 
-Player One Controller (See Controls in Starter Assets Input):
+Keyboard Controller (See Controls in Starter Assets Input):
 
 Backward/Forward, Forward/Backward 		- A/D
 Weapon Equip Toggle				- I
-Punch/Kick, (Weapon Equip) Swing/Jab		- P/K
-Special Hand Weapon Attack (Weapon Unequip)	- H
-Jump (+ Backward/Forward) (Weapon Unequip)	- Space (+ A/D)
-Crouch						- C
-Special Move					- U
+Punch/Kick/Jab/Hit (Weapon Equip/Uneuquip)	- P/K/J/L
+Hand Weapon Attack (Weapon Equip/Uneuquip)	- H
+Jump (+ Backward/Forward) (Weapon Equip/Uneuquip)- Space (+ A/D)
+Crouch	(+ Backward/Forward)			- C (+ A/D)
+Special Move (Weapon Equip/Uneuquip)		- U
+Block						- B
 
+Gamepad Controller
 
+Backward/Forward, Forward/Backward 		- Analog Stick
+Weapon Equip Toggle				- LB
+Punch/Kick/Jab/Hit (Weapon Equip/Uneuquip)	- B/X/Y/A
+Hand Weapon Attack (Weapon Equip/Uneuquip)	- RB
+Jump (+ Backward/Forward) (Weapon Equip/Uneuquip)- Upward Analog Stick
+Crouch	(+ Backward/Forward)			- Downward Analog Stick (+ Left/Right Analog)
+Special Move (Weapon Equip/Uneuquip)		- LT
+Block						- RT
 
 
 
@@ -37,16 +47,14 @@ Special Move					- U
 
 How To Add A New Move
 
-Edit:
 
-Starter Assets (Input Assets) : When a new button needs to be mapped to a new control/button.
+Edit Starter Assets Input System (Input Assets) : When a new button needs to be mapped to a new control/button, create it in the Input Assets.
 
-Starter Assets Input C# File : When a new button has been mapped to a control. Updating this script allows the C_Controller to access the input values via the InputValue (_input) class.
+Edit Starter Assets Input C# File : Update this script to allow the C_Controller to access the input values via the InputValue (_input) class. This will allow the script to know when the button was pushed and to act appropriately.
 
-Character Animator Controller : When an animation needs to be mapped to a control. Variables should be created to control the State Machine flow and the values will be updated continuously in the C_Controller script. (Examples in the script)
+Character Animator Controller : When an animation needs to be mapped to a new control. Variables should be created within the animator to control the State Machine flow and the values will be updated continuously in the C_Controller script. An associated animator ID needs to be created to manage the value created in the animator (See examples in the player script)
 
-C_Controller Script : When changes to the Player controls need to be made, including new moves, updated moves, weapons, movements and more. Awake() and Start() functions are called once and the Update() function is called every frame to update the scene.
-
+Edit C_Controller Script : Awake() and Start() functions are called once and the Update() function is called every frame to update the scene. Checks for controller updates like push and release need to be monitored in Update().
 
 
 How To Create A Prefab (Blender)

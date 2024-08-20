@@ -14,6 +14,8 @@ namespace StarterAssets
 		public bool sprint;
 		public bool punch;
 		public bool kick;
+		public bool jab;
+		public bool hit;
 		public bool crouch = false;
 		public bool equipWeapon = false;
 		public bool equipHandWeapon = false;
@@ -59,7 +61,17 @@ namespace StarterAssets
 			KickInput(value.isPressed);
 		}
 
-		public void OnWeapon(InputValue value) {
+		public void OnJab(InputValue value)
+		{
+			JabInput(value.isPressed);
+		}
+
+        public void OnHit(InputValue value)
+        {
+            HitInput(value.isPressed);
+        }
+
+        public void OnWeapon(InputValue value) {
 			if (value.isPressed) {
 				WeaponInput();
 			}
@@ -125,7 +137,16 @@ namespace StarterAssets
 			kick = newKickState;
 		}
 
-		public void WeaponInput()
+		public void JabInput(bool newJabState)
+		{
+			jab = newJabState;
+		}
+
+        public void HitInput(bool newHitState)
+        {
+            hit = newHitState;
+        }
+        public void WeaponInput()
 		{
             equipWeapon = !equipWeapon; // flip boolean
         }
