@@ -55,6 +55,7 @@ Character Models
 1. Software Engineer - The software engineer will be distinctly identified by a gas mask where the character inhales 1s and exhales 0s through the holes in the gas mask.
 2. Electrical Engineer - The electrical engineer will be distinctly defined by an electronic emoji mask whose emojis update based on the current state of the round.
 3. Mathematician - ???
+4. Personification of Programming Languages
 
 Material
 1. Integral, Clk, Summation
@@ -64,9 +65,9 @@ Add Ons
 1. Unique Robe for Characters
 
 Fixes & Updates
-1. Clk animation (Updated)
+1. Clk animation (Fixed... for now)
 2. Stun Step back
-3. Punch and Kick Combos
+3. Punch and Kick Combos (Part of advanced animations)
 4. Update Animations (run, step back, special move, weapon equip/unequip, blocking to run/stepback/idle, stun animation plays regardless of opponent's current animation state (run, walk, idle, weapon equip)
 5. Gamepad and Controller mappings affect both characters using these control schemes at the same time. (Fixed)
 6. Occasional Jumps without player jumping in the air (Caused by upward flicks of the left analog stick in Gamepad controller) (Fixed / Patched)

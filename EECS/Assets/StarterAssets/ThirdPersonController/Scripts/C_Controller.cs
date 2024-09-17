@@ -173,7 +173,7 @@ namespace StarterAssets
         private bool CoolDown;
         private float StunEndTime;
         private float NextJumpTime;
-        private float JumpCoolDownTime = 1.3f;
+        private float JumpCoolDownTime = 1.5f;
         private float NextAttackTime;
         private float AttackCoolDownTime = 1.0f;
         private float NextHandWeaponTime;
@@ -541,6 +541,7 @@ namespace StarterAssets
         {
             // reset the fall timeout timer
             _fallTimeoutDelta = FallTimeout;
+            float dampen = _animator.GetCurrentAnimatorStateInfo(0).IsName("Jump") ? 1.45f : 1.0f;
 
             if (Time.time > NextJumpTime)
             {
@@ -574,7 +575,7 @@ namespace StarterAssets
 
             if (_verticalVelocity < _terminalVelocity)
             {
-                _verticalVelocity += Gravity * Time.deltaTime;
+                _verticalVelocity += Gravity * Time.deltaTime * dampen;
             }
         }
         private void DisableInput()
@@ -1244,7 +1245,7 @@ namespace StarterAssets
         }
         private void CircuitProjectileAttack()
         {
-            if (PlayerType == "Electrical Engineer") {
+            if (PlayerType == "Electrical Engineer" && WeaponEquip) {
                 // EE - Weapon Projectile
                 bool activeOneAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack1");
                 bool activeTwoAnimation = _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack2");

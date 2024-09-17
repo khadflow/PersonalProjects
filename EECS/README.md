@@ -45,7 +45,7 @@ Block						- RT
 
 ##### TUTORIALS #####
 
-How To Add A New Move
+# How To Add A New Move
 
 
 Edit Starter Assets Input System (Input Assets) : When a new button needs to be mapped to a new control/button, create it in the Input Assets.
@@ -57,7 +57,7 @@ Character Animator Controller : When an animation needs to be mapped to a new co
 Edit C_Controller Script : Awake() and Start() functions are called once and the Update() function is called every frame to update the scene. Checks for controller updates like push and release need to be monitored in Update().
 
 
-How To Create A Prefab (Blender)
+# How To Create A Prefab (Blender)
 
 1. Import a reference image by switching to Object Mode (if not already there) and choose "Add", then "Image" and "Reference"
 
@@ -75,7 +75,7 @@ How To Create A Prefab (Blender)
 
 
 
-How to Create An Animated Scene Prefab
+# How to Create An Animated Scene Prefab
 
 1. Open the Editor Type Tab in the top left and choose the Dope Sheet view.
 
@@ -84,6 +84,11 @@ How to Create An Animated Scene Prefab
 3. How to add Keyframes: https://youtu.be/CBJp82tlR3M?si=mCNKoK7KYcKQd0ra
 
 4. Export the object as an FBX prefab for Unity
+
+
+# DAZ 3D Character Creation Notes
+
+
 
 
 

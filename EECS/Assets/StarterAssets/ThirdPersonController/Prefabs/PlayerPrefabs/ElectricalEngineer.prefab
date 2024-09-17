@@ -385,7 +385,7 @@ MonoBehaviour:
       m_Calls: []
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: KeyboardMouse
+  m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -483,6 +483,8 @@ MonoBehaviour:
   sprint: 0
   punch: 0
   kick: 0
+  jab: 0
+  hit: 0
   crouch: 0
   equipWeapon: 0
   equipHandWeapon: 0
