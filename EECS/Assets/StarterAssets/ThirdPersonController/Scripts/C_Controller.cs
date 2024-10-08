@@ -528,6 +528,17 @@ namespace StarterAssets
             }
         }
 
+        public void DestroyHealthBars()
+        {
+            if (PlayerNumber == 1)
+            {
+                Destroy(GameObject.FindGameObjectWithTag("PlayerOneHealth"));
+            } else
+            {
+                Destroy(GameObject.FindGameObjectWithTag("PlayerTwoHealth"));
+            }
+        }
+
         /* Character Movement */
         private bool Crouch()
         {

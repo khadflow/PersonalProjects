@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 using UnityEngine;
 
 namespace StarterAssets
@@ -7,7 +8,8 @@ namespace StarterAssets
     public class PlayerSelect : MonoBehaviour
     {
         /* UI Management */
-        private PlayerSpawn MainMenu;
+        public GameObject MainMenu; // For PlayerSpawn Reference
+        private PlayerSpawn PlayerSpawnObj;
         private Vector3 MenuPos;
         private Vector3 CharacterSelectPos;
 
@@ -17,16 +19,19 @@ namespace StarterAssets
         public GameObject[] Characters;
         public GameObject[] CharacterModels;
         private GameObject displayedCharacter;
-    
-        private bool isSelecting = false;
+
+        /* Event Management */
+        public EventSystem MainMenuEvent;
+        public EventSystem PlayerSelectEvent;
+
+        private bool isSelecting = true;
         public GameObject _mainCamera;
 
         void Start()
         {
-
             // Player Spawn Management
             selectedCharacter = 0;
-            MainMenu = GetComponent<PlayerSpawn>();
+            PlayerSpawnObj = MainMenu.gameObject.GetComponent<PlayerSpawn>();
             
             CharacterSelectPos = new Vector3(_mainCamera.transform.position.x, _mainCamera.transform.position.y - 1, _mainCamera.transform.position.z + 2);
         }
@@ -79,15 +84,20 @@ namespace StarterAssets
             Debug.Log("Selecting Player " + PlayerNumSelect);
             if (PlayerNumSelect == 1)
             {
-                MainMenu.SetPlayerOne(Characters[selectedCharacter]);
+                PlayerSpawnObj.SetPlayerOne(Characters[selectedCharacter]);
                 PlayerNumSelect++;
             } else if (PlayerNumSelect == 2)
             {
-                MainMenu.SetPlayerTwo(Characters[selectedCharacter]);
+                PlayerSpawnObj.SetPlayerTwo(Characters[selectedCharacter]);
                 isSelecting = false;
-                MainMenu.ResetMainMenu();
                 Destroy(displayedCharacter);
                 PlayerNumSelect = 1;
+
+                // Event System Change
+                PlayerSelectEvent.gameObject.SetActive(false);
+                MainMenuEvent.gameObject.SetActive(true);
+
+                PlayerSpawnObj.ResetMainMenu();
             }
         }
     }

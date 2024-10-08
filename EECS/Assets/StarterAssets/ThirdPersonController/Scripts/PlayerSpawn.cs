@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using Unity.VisualScripting;
 namespace StarterAssets
@@ -14,7 +15,14 @@ namespace StarterAssets
         private Vector3 MenuPos;
         private Vector3 HiddenPos;
         private Image image;
+
+        public GameObject PlayerSelect; // For Player Select Reference
+        private PlayerSelect PlayerSelection;
+
+        public EventSystem MainMenuEvent;
         public Button[] MainMenuButtons;
+
+        public EventSystem PlayerSelectEvent;
         public Button[] PlayerSelectButtons;
 
         public GameObject Round;
@@ -25,7 +33,6 @@ namespace StarterAssets
 
         /* Player Spawn Management */
         private float dist = 3.0f;
-        private PlayerSelect PlayerSelection;
         private GameObject P1, P2;
         private Vector3 P1StartLocation, P2StartLocation;
         public GameObject _mainCamera;
@@ -45,7 +52,7 @@ namespace StarterAssets
             Round.SetActive(false);
 
             // Menu Components
-            PlayerSelection = GetComponent<PlayerSelect>();
+            PlayerSelection = PlayerSelect.gameObject.GetComponent<PlayerSelect>();
             image = GetComponent<Image>();
 
             // Default Players
@@ -62,7 +69,6 @@ namespace StarterAssets
 
         void Update()
         {
-            
             if (ActiveGame && !Players_Spawned)
             {
                 C_Controller.NumberOfPlayers = 0;
@@ -89,6 +95,8 @@ namespace StarterAssets
                     MenuTimer = Time.time + MenuCountdown;
                     ActiveGame = false;
                     C_Controller.ResetRound();
+
+                    MainMenuEvent.gameObject.SetActive(true);
                 }
 
                 if (C_Controller.Round <= 2 && ActiveGame)
@@ -102,6 +110,8 @@ namespace StarterAssets
                 if (MenuTimer < Time.time)
                 {
                     transform.position = MenuPos;
+                    P1.GetComponent<C_Controller>().DestroyHealthBars();
+                    P2.GetComponent<C_Controller>().DestroyHealthBars();
                     Destroy(P1);
                     Destroy(P2);
                     Players_Spawned = false;
@@ -121,6 +131,9 @@ namespace StarterAssets
             {
                 b.gameObject.SetActive(true);
             }
+            MainMenuEvent.gameObject.SetActive(false);
+            PlayerSelectEvent.gameObject.SetActive(true);
+
             image.gameObject.SetActive(false);
         }
 
@@ -151,6 +164,7 @@ namespace StarterAssets
                 tmp = Round.GetComponent<TextMeshProUGUI>();
                 tmp.text = "Round " + C_Controller.Round.ToString();
                 ActiveGame = true;
+                MainMenuEvent.gameObject.SetActive(false);
             }
         }
 
@@ -166,6 +180,11 @@ namespace StarterAssets
                 b.gameObject.SetActive(true);
             }
 
+            // Return to Main Menu
+            PlayerSelectEvent.gameObject.SetActive(false);
+            MainMenuEvent.gameObject.SetActive(true);
+
+            image = GetComponent<Image>();
             image.gameObject.SetActive(true);
         }
 

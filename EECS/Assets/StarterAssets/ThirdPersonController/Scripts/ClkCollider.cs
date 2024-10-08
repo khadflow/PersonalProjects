@@ -19,9 +19,15 @@ namespace StarterAssets
         // Update is called once per frame
         void Update()
         {
-            float offset = -1.75f;
+ 
+        }
 
-            if (_degrees == 90.0f || _degrees == 270.0f) {
+        private void LateUpdate()
+        {
+            float offset = -1.5f;
+
+            if (_degrees == 90.0f || _degrees == 270.0f)
+            {
 
                 clk_collider.center = new Vector3(clk_collider.center.x, clk_collider.center.y, clk_collider.center.z + offset);
 
