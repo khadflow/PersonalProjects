@@ -378,6 +378,8 @@
 -r:"Library/Bee/artifacts/1900b0aE.dag/UnityEngine.UI.ref.dll"
 -analyzer:"C:/Program Files/Unity/Unity 2022.3.10f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll"
 -analyzer:"C:/Program Files/Unity/Unity 2022.3.10f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
+"Assets/StarterAssets/InputSystem/InputSystem/InputController.cs"
+"Assets/StarterAssets/InputSystem/InputSystem/PlayerInputActions.cs"
 "Assets/StarterAssets/InputSystem/StarterAssetsInputs.cs"
 "Assets/StarterAssets/Mobile/Scripts/CanvasInputs/UICanvasControllerInput.cs"
 "Assets/StarterAssets/Mobile/Scripts/Utilities/MobileDisableAutoSwitchControls.cs"

@@ -10,7 +10,7 @@ Player
 		Assign 'Y' 'X' 'B' 'A'
 		Assign RB LT RT(Block specific to crouch)
 	Stuns
-	Crouch
+	Crouch (Done)
 4. Weapon Attacks
 	Assign 'Y' (Done - Weapon Equip/Unequip)
 	Assign LT (Done - Weapon Equip/Unequip)

@@ -7,7 +7,7 @@
       "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\thirdpersoncontroller\\scripts\\c_controller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|c:\\users\\khadi\\unity\\personalprojects\\eecs\\assets\\starterassets\\thirdpersoncontroller\\scripts\\playerspawn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\assets\\starterassets\\thirdpersoncontroller\\scripts\\playerspawn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\thirdpersoncontroller\\scripts\\playerspawn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -32,7 +32,7 @@
               "RelativeDocumentMoniker": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
               "ToolTip": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
               "RelativeToolTip": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
-              "ViewState": "AgIAAAUCAAAAAAAAAAArwBcCAAASAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-09T19:14:37.473Z",
               "EditorCaption": ""
@@ -47,8 +47,7 @@
               "RelativeToolTip": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSpawn.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAHEAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-08T17:27:07.127Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-08T17:27:07.127Z"
             },
             {
               "$type": "Document",
@@ -60,8 +59,7 @@
               "RelativeToolTip": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSelect.cs",
               "ViewState": "AgIAAFwAAAAAAAAAAAAuwGYAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T03:23:51.917Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-24T03:23:51.917Z"
             }
           ]
         }

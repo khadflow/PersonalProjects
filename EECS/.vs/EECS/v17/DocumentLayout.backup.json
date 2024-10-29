@@ -3,7 +3,19 @@
   "WorkspaceRootPath": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|c:\\users\\khadi\\unity\\personalprojects\\eecs\\assets\\starterassets\\thirdpersoncontroller\\scripts\\playerspawn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|c:\\users\\khadi\\unity\\personalprojects\\eecs\\assets\\starterassets\\thirdpersoncontroller\\scripts\\c_controller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\thirdpersoncontroller\\scripts\\c_controller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\assets\\starterassets\\inputsystem\\starterassetsinputs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\inputsystem\\starterassetsinputs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\assets\\starterassets\\inputsystem\\inputcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\inputsystem\\inputcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\assets\\starterassets\\thirdpersoncontroller\\scripts\\playerspawn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2BB6FDED-E035-8005-5AF8-709867CE2FC2}|Assembly-CSharp.csproj|solutionrelative:assets\\starterassets\\thirdpersoncontroller\\scripts\\playerspawn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -18,33 +30,68 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "InputController.cs",
+              "DocumentMoniker": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\InputSystem\\InputController.cs",
+              "RelativeDocumentMoniker": "Assets\\StarterAssets\\InputSystem\\InputController.cs",
+              "ToolTip": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\InputSystem\\InputController.cs",
+              "RelativeToolTip": "Assets\\StarterAssets\\InputSystem\\InputController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-29T01:44:32.028Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "StarterAssetsInputs.cs",
+              "DocumentMoniker": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\InputSystem\\StarterAssetsInputs.cs",
+              "RelativeDocumentMoniker": "Assets\\StarterAssets\\InputSystem\\StarterAssetsInputs.cs",
+              "ToolTip": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\InputSystem\\StarterAssetsInputs.cs",
+              "RelativeToolTip": "Assets\\StarterAssets\\InputSystem\\StarterAssetsInputs.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-29T01:19:54.496Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "C_Controller.cs",
+              "DocumentMoniker": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
+              "RelativeDocumentMoniker": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
+              "ToolTip": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
+              "RelativeToolTip": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\C_Controller.cs",
+              "ViewState": "AgIAAA4BAAAAAAAAAAApwI8BAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-09T19:14:37.473Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "PlayerSpawn.cs",
               "DocumentMoniker": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSpawn.cs",
               "RelativeDocumentMoniker": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSpawn.cs",
               "ToolTip": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSpawn.cs",
               "RelativeToolTip": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSpawn.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAArwC8AAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHEAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-08T17:27:07.127Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-08T17:27:07.127Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "PlayerSelect.cs",
               "DocumentMoniker": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSelect.cs",
               "RelativeDocumentMoniker": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSelect.cs",
               "ToolTip": "C:\\Users\\khadi\\Unity\\PersonalProjects\\EECS\\Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSelect.cs",
               "RelativeToolTip": "Assets\\StarterAssets\\ThirdPersonController\\Scripts\\PlayerSelect.cs",
-              "ViewState": "AgIAAFwAAAAAAAAAAAAuwCwAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAFwAAAAAAAAAAAAuwGYAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T03:23:51.917Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-24T03:23:51.917Z"
             }
           ]
         }
