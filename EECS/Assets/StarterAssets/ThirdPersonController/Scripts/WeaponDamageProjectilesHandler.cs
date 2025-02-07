@@ -15,7 +15,7 @@ namespace StarterAssets
         public bool switchCondition = true;
 
         private float NextShootTime;
-        private float ShootCooldown = 0.7f;
+        private float ShootCooldown = 1.6f;
         // Start is called before the first frame update
         void Start()
         {
@@ -43,7 +43,7 @@ namespace StarterAssets
                 bull.GetComponent<Rigidbody>().AddForce(new Vector3(direction, 0.0f, 0.0f) * shootForce, ForceMode.Impulse);
                 Attacking = false;
             }
-            else if (NextShootTime + 1.0f < Time.time + 1.0f)
+            else if (NextShootTime - 0.2f < Time.time)
             {
                 Destroy(bull);
             }

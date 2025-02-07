@@ -321,7 +321,7 @@ PrefabInstance:
       addedObject: {fileID: 6390651502763504400}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f91e8a03387a6f84386ffdf1ec58d03b, type: 3}
       insertIndex: -1
-      addedObject: {fileID: -1634690370034463612}
+      addedObject: {fileID: 6881368619127838838}
   m_SourcePrefab: {fileID: 100100000, guid: f91e8a03387a6f84386ffdf1ec58d03b, type: 3}
 --- !u!4 &75523901924609308 stripped
 Transform:
@@ -408,8 +408,6 @@ MonoBehaviour:
   LandingAudioClip: {fileID: 0}
   FootstepAudioClips: []
   FootstepAudioVolume: 0.5
-  JumpHeight: 2.2
-  Gravity: -15
   JumpTimeout: 0.5
   FallTimeout: 0.15
   Grounded: 1
@@ -487,7 +485,7 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 7027127929025406325, guid: f91e8a03387a6f84386ffdf1ec58d03b, type: 3}
---- !u!114 &-1634690370034463612
+--- !u!114 &6881368619127838838
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

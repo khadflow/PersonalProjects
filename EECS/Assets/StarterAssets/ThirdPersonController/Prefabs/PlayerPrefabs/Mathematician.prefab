@@ -1257,7 +1257,7 @@ GameObject:
   - component: {fileID: 6652529436592787068}
   - component: {fileID: 458289716083442137}
   - component: {fileID: -8238589130418075751}
-  - component: {fileID: 4204866327864916853}
+  - component: {fileID: 6534740101416541697}
   m_Layer: 0
   m_Name: Mathematician
   m_TagString: Player
@@ -1405,7 +1405,7 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 2bed1656-67e5-4a60-a900-46e209dc217b
     m_ActionName: Player2/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow]
-  m_NeverAutoSwitchControlSchemes: 1
+  m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
@@ -1441,8 +1441,6 @@ MonoBehaviour:
   LandingAudioClip: {fileID: 0}
   FootstepAudioClips: []
   FootstepAudioVolume: 0.5
-  JumpHeight: 2
-  Gravity: -15
   JumpTimeout: 0.5
   FallTimeout: 0.15
   Grounded: 1
@@ -1491,7 +1489,7 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 6796121518194019630, guid: 1eca24cd5e83d444c9cd1894c0f15970, type: 3}
---- !u!114 &4204866327864916853
+--- !u!114 &6534740101416541697
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

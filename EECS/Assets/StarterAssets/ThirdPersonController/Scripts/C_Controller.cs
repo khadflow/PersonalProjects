@@ -25,9 +25,11 @@ namespace StarterAssets
         /* Shared */
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
+        // REMOVE
         public float MoveSpeed = 2.5f;
 
         [Tooltip("Sprint speed of the character in m/s")]
+        // REMOVE
         public float SprintSpeed = 5.335f;
 
         [Tooltip("How fast the character turns to face movement direction")]
@@ -43,10 +45,10 @@ namespace StarterAssets
 
         [Space(10)]
         [Tooltip("The height the player can jump")]
-        public float JumpHeight = 2.2f;
+        private float JumpHeight = 1.8f;
 
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
-        public float Gravity = -15.0f;
+        private float Gravity = -15.0f;
 
         [Space(10)]
         [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
@@ -114,7 +116,6 @@ namespace StarterAssets
 
         /* shared animation IDs */
         private int _animIDSpeed;
-        private int _animIDJumping;
         private int _animIDGrounded;
         private int _animIDCoolDown;
         private int _animIDStepBack;
@@ -155,7 +156,7 @@ namespace StarterAssets
         private bool JabStarted;
         private bool HitStarted;
         private bool AttackMadeContact;
-        private float MoveCap = 2.5f;
+        private float MoveCap = 2.7f;
 
         /* Player Management */
         public float health;
@@ -173,9 +174,9 @@ namespace StarterAssets
         private bool CoolDown;
         private float StunEndTime;
         private float NextJumpTime;
-        private float JumpCoolDownTime = 1.5f;
+        private float JumpCoolDownTime = 1.3f;
         private float NextAttackTime;
-        private float AttackCoolDownTime = 1.0f;
+        private float AttackCoolDownTime = 1.4f;
         private float NextHandWeaponTime;
         private float HandWeaponTimeOut = 5.0f;
         private float NextSMOAttackTime;
@@ -183,7 +184,6 @@ namespace StarterAssets
         /* Jump Management */
         private bool backwardJump;
         private bool forwardJump;
-        private bool jump;
 
         /* EE */
         [SerializeField] GameObject Clk;
@@ -303,6 +303,17 @@ namespace StarterAssets
                 DisableInput();
                 opp.DisableInput();
                 Move();
+            } else if (Crouch())
+            {
+                _input.jump = false;
+                _input.punch = false;
+                _input.kick = false;
+                _input.jab = false;
+                _input.hit = false;
+                _input.smo = false;
+                JumpAndGravity();
+                Move();
+                EquipWeapon();
             }
             else if (Timer < Time.time)
             {
@@ -311,10 +322,9 @@ namespace StarterAssets
                     DisableInput();
                 }
 
-                if (StunEndTime < Time.time && !Crouch() && !Block())
+                if (StunEndTime < Time.time)
                 {
-                    MoveCap = 2.5f;
-                    if (WeaponInHand == null)
+                    if (WeaponInHand == null && NextJumpTime < Time.time)
                     {
                         if (PlayerType == "Mathematician")
                         {
@@ -340,32 +350,42 @@ namespace StarterAssets
                         _input.equipWeapon = false;
                     }*/
 
-                    // Equip/Unequip Main Weapon
+                    // Equip/Unequip Main Weapon - No movement/jumping/attacks while using hand weapon
                     if (!HandWeaponEquip)
                     {
                         EquipWeapon();
                         JumpAndGravity();
-                        if (NextJumpTime < Time.time && !WeaponEquip)
+                        // Actions only be done if not currently jumping
+                        if (NextJumpTime < Time.time)
                         {
-                            EquipHandWeapon();
-                        }
+                            if (!WeaponEquip) {
+                                EquipHandWeapon();
+                            }
+                            if (WeaponEquip)
+                            {
+                                WeaponP();
+                                WeaponK();
+                                WeaponJ();
+                                WeaponH();
 
-                        if (WeaponEquip)
+                                WeaponSMO();
+                                WeaponHW();
+                            }
+                            else
+                            {
+                                Punch(); // West
+                                Kick(); // East
+                                Jab(); // North
+                                Hit(); // South
+                            }
+                            Block();
+                        } else
                         {
-                            WeaponP();
-                            WeaponK();
-                            WeaponJ();
-                            WeaponH();
-
-                            WeaponSMO();
-                            WeaponHW();
-                        }
-                        else
-                        {
-                            Punch(); // West
-                            Kick(); // East
-                            Jab(); // North
-                            Hit(); // South
+                            _input.punch = false;
+                            _input.kick = false;
+                            _input.jab = false;
+                            _input.hit = false;
+                            _input.smo = false;
                         }
                     }
                     else
@@ -379,25 +399,15 @@ namespace StarterAssets
                     _input.hit = false;
                     _input.equipHandWeapon = false;
 
-                    if (NextAttackTime - 0.1f < Time.time && NextHandWeaponTime - 2.5f < Time.time)
+                    if (NextAttackTime - 0.2f < Time.time
+                        && NextHandWeaponTime - 2.5f < Time.time
+                        && NextSwordSwing < Time.time - 0.1f)
                     {
                         Move();
                     }
-                } else if (Crouch())
+                } else if (NextJumpTime < Time.time)
                 {
-                    // reduce speed while crouching
-                    MoveCap = 1.5f;
-                    _input.jump = false;
-                    _input.punch = false;
-                    _input.kick = false;
-                    _input.jab = false;
-                    _input.hit = false;
-                    _input.smo = false;
-                    Move();
-                    EquipWeapon();
-                }
-                else if (Block())
-                {
+                    _input.isBlocking = false;
                     _input.jump = false;
                     _input.punch = false;
                     _input.jab = false;
@@ -419,13 +429,17 @@ namespace StarterAssets
             if (Timer < Time.time)
             {
                 _animator.SetBool(_animIDAttackCoolDown,
-                                 (Time.time < NextAttackTime - 0.5f)
+                                 (Time.time < NextAttackTime)
                                  || (Time.time < NextSwordSwing));
                 _animator.SetBool(_animIDStun, false);
 
                 Orientation();
 
-                SummationAttackHandling();
+                // Do not do while jumping
+                if (NextJumpTime < Time.time)
+                {
+                    SummationAttackHandling();
+                }
 
                 VectorAttackTrajectory();
 
@@ -437,7 +451,6 @@ namespace StarterAssets
         private void AssignAnimationIDs()
         {
             _animIDSpeed = Animator.StringToHash("Speed");
-            _animIDJumping = Animator.StringToHash("Jumping");
             _animIDGrounded = Animator.StringToHash("Grounded");
             _animIDCoolDown = Animator.StringToHash("CoolDown");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
@@ -542,9 +555,10 @@ namespace StarterAssets
         /* Character Movement */
         private bool Crouch()
         {
-            bool keyDown = (System.Math.Floor(_playerInput.actions["Crouch"].ReadValue<float>()) == 1);
+            bool keyDown = Mathf.Abs(_playerInput.actions["Crouch"].ReadValue<float>()) > 0.1f;
             _input.crouch = _input.crouch && keyDown;
             _animator.SetBool(_animIDCrouch, _input.crouch);
+            MoveCap = _input.crouch ? 1.5f : 2.7f;
             return _input.crouch;
         }
 
@@ -552,14 +566,12 @@ namespace StarterAssets
         {
             // reset the fall timeout timer
             _fallTimeoutDelta = FallTimeout;
-            float dampen = _animator.GetCurrentAnimatorStateInfo(0).IsName("Jump") ? 1.45f : 1.0f;
 
             if (Time.time > NextJumpTime)
             {
                 CoolDown = false;
                 _animator.SetBool(_animIDCoolDown, CoolDown);
-                if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Jump")
-                 || _animator.GetCurrentAnimatorStateInfo(0).IsName("ForwardFlip")
+                if (_animator.GetCurrentAnimatorStateInfo(0).IsName("ForwardFlip")
                  || _animator.GetCurrentAnimatorStateInfo(0).IsName("Backflip"))
                 {
                     NextJumpTime = Time.time + JumpCoolDownTime;
@@ -576,23 +588,26 @@ namespace StarterAssets
                     }
                 }
                 _input.jump = false;
-                jump = false;
                 forwardJump = false;
                 backwardJump = false;
-                _animator.SetBool(_animIDJumping, false);
                 _animator.SetBool(_animIDBackwardJump, false);
                 _animator.SetBool(_animIDForwardJump, false);
+            } else if (Time.time > NextJumpTime)
+            {
+                CoolDown = false;
+                _animator.SetBool(_animIDCoolDown, CoolDown);
             }
 
             if (_verticalVelocity < _terminalVelocity)
             {
-                _verticalVelocity += Gravity * Time.deltaTime * dampen;
+                _verticalVelocity += Gravity * Time.deltaTime;
             }
         }
         private void DisableInput()
         {
             _input.jump = false;
-            _animator.SetBool(_animIDJumping, false);
+            _animator.SetBool(_animIDForwardJump, false);
+            _animator.SetBool(_animIDBackwardJump, false);
             _input.punch = false;
             _animator.SetBool(_animIDPunch, false);
             _input.kick = false;
@@ -603,6 +618,8 @@ namespace StarterAssets
             _animator.SetBool(_animIDHit, false);
             _input.smo = false;
             _animator.SetBool(_animIDsmo, false);
+            _input.crouch = false;
+            _animator.SetBool(_animIDCrouch, false);
             _input.equipWeapon = WeaponEquip;
             _input.move = Vector2.zero;
             _speed = 0.0f;
@@ -618,6 +635,8 @@ namespace StarterAssets
 
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+
+            // Current facing direction of the player
             float direction = (_degrees == FirstPlayerDegrees ? 1 : -1);
 
             /* Deal With Input while stunned */
@@ -695,19 +714,16 @@ namespace StarterAssets
             bool stepBack = (direction == 1) ? (_input.move.x < 0.0f) : (_input.move.x > 0.0f);
             _animator.SetBool(_animIDStepBack, stepBack);
 
-            jump = ((_input.jump || keyDown) && !CoolDown && !_input.crouch);
-            backwardJump = (((direction == 1) ? (jump && _input.move.x < 0.0f) : (jump && _input.move.x > 0.0f))) && stepBack && _speed > 0.0f;
-            forwardJump = (((direction == 1) ? (jump && _input.move.x > 0.0f) : (jump && _input.move.x < 0.0f))) && !stepBack && _speed > 0.0f;
-            jump = jump && !backwardJump && !forwardJump && _input.move == Vector2.zero;
+            bool jump = Mathf.Abs(_playerInput.actions["Jump"].ReadValue<float>()) > 0.1f;
+            forwardJump = !stepBack && jump;
+            backwardJump = jump && !forwardJump;
 
             if (NextJumpTime < Time.time)
             {
-                _animator.SetBool(_animIDJumping, jump);
                 _animator.SetBool(_animIDBackwardJump, backwardJump);
                 _animator.SetBool(_animIDForwardJump, forwardJump);
             } else
             {
-                _animator.SetBool(_animIDJumping, false);
                 _animator.SetBool(_animIDBackwardJump, false);
                 _animator.SetBool(_animIDForwardJump, false);
             
@@ -916,10 +932,9 @@ namespace StarterAssets
             if (_input.equipHandWeapon
                 && NextHandWeaponTime < Time.time
                 && NextAttackTime < Time.time
-                && !HandWeaponEquip && _input.move == Vector2.zero
+                && !HandWeaponEquip
                 && ActiveClk == null)
             {
-
                 WeaponInHand = Instantiate(HandWeapon, HandWeaponHolder.transform);
                 WeaponInHand.tag = (PlayerNumber == 1) ? "Player" : "Player2";
 
@@ -927,7 +942,6 @@ namespace StarterAssets
                 NextHandWeaponTime = Time.time + HandWeaponTimeOut;
 
                 _input.equipHandWeapon = false;
-                _input.move = Vector2.zero;
                 HandWeaponEquip = true;
                 _animator.SetBool(_animIDHandWeapon, true);
             }
@@ -991,7 +1005,6 @@ namespace StarterAssets
         {
             if (NextSwordSwing < Time.time && _input.punch)
             {
-                _input.move = Vector2.zero;
                 
                 if (PlayerType == "Mathematician")
                 {
@@ -1001,13 +1014,8 @@ namespace StarterAssets
                 }
                 else if (PlayerType == "Electrical Engineer")
                 {
-                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
-                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run"))
-                    {
-                        _animator.SetBool(_animIDPunch, _input.punch);
-                        
-                        ProjectileFired = false;
-                    }
+                    _animator.SetBool(_animIDPunch, _input.punch);
+                    ProjectileFired = false;
                 }
                 _input.punch = false;
             } else if (NextSwordSwing < Time.time && PlayerType == "Mathematician")
@@ -1028,20 +1036,15 @@ namespace StarterAssets
         {
             if (NextSwordSwing < Time.time && _input.kick)
             {
-                _input.move = Vector2.zero;
+
                 if (PlayerType == "Mathematician") {
                     NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
                     _animator.SetBool(_animIDKick, _input.kick);
                     WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
-                } else if (PlayerType == "Electrical Engineer" && _input.move == Vector2.zero)
+                } else if (PlayerType == "Electrical Engineer")
                 {
-                    
-                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
-                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run")) {
-                        _animator.SetBool(_animIDKick, _input.kick);
-                        ProjectileFired = false;
-                    }
-                    
+                    _animator.SetBool(_animIDKick, _input.kick);
+                    ProjectileFired = false;
                 }
                 _input.kick = false;
             }
@@ -1063,23 +1066,18 @@ namespace StarterAssets
         {
             if (NextSwordSwing < Time.time && _input.jab)
             {
-                _input.move = Vector2.zero;
+
                 if (PlayerType == "Mathematician")
                 {
                     NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
                     _animator.SetBool(_animIDJab, _input.jab);
                     WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
                 }
-                else if (PlayerType == "Electrical Engineer" && _input.move == Vector2.zero)
+                else if (PlayerType == "Electrical Engineer")
                 {
 
-                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
-                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run"))
-                    {
-                        _animator.SetBool(_animIDJab, _input.jab);
-                        ProjectileFired = false;
-                    }
-
+                    _animator.SetBool(_animIDJab, _input.jab);
+                    ProjectileFired = false;
                 }
                 _input.jab = false;
             }
@@ -1102,7 +1100,6 @@ namespace StarterAssets
         {
             if (NextSwordSwing < Time.time && _input.hit)
             {
-                _input.move = Vector2.zero;
 
                 if (PlayerType == "Mathematician")
                 {
@@ -1112,13 +1109,8 @@ namespace StarterAssets
                 }
                 else if (PlayerType == "Electrical Engineer")
                 {
-                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
-                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run"))
-                    {
-                        _animator.SetBool(_animIDHit, _input.hit);
-
-                        ProjectileFired = false;
-                    }
+                    _animator.SetBool(_animIDHit, _input.hit);
+                    ProjectileFired = false;
                 }
                 _input.hit = false;
             }
@@ -1141,7 +1133,6 @@ namespace StarterAssets
         {
             if (NextSwordSwing < Time.time && _input.smo)
             {
-                _input.move = Vector2.zero;
 
                 if (PlayerType == "Mathematician")
                 {
@@ -1151,13 +1142,8 @@ namespace StarterAssets
                 }
                 else if (PlayerType == "Electrical Engineer")
                 {
-                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
-                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run"))
-                    {
-                        _animator.SetBool(_animIDsmo, _input.smo);
-
-                        ProjectileFired = false;
-                    }
+                    _animator.SetBool(_animIDsmo, _input.smo);
+                    ProjectileFired = false;
                 }
                 _input.punch = false;
             }
@@ -1180,7 +1166,6 @@ namespace StarterAssets
         {
             if (NextSwordSwing < Time.time && _input.equipHandWeapon)
             {
-                _input.move = Vector2.zero;
 
                 if (PlayerType == "Mathematician")
                 {
@@ -1190,13 +1175,8 @@ namespace StarterAssets
                 }
                 else if (PlayerType == "Electrical Engineer")
                 {
-                    if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Unarmed Walk Back")
-                        && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Standard Run"))
-                    {
-                        _animator.SetBool(_animIDHandWeapon, _input.equipHandWeapon);
-
-                        ProjectileFired = false;
-                    }
+                    _animator.SetBool(_animIDHandWeapon, _input.equipHandWeapon);
+                    ProjectileFired = false;
                 }
                 _input.punch = false;
             }
@@ -1269,7 +1249,7 @@ namespace StarterAssets
                      && !ProjectileFired && NextSwordSwing < Time.time)
                 { 
                     ProjectileFired = true;
-                    NextSwordSwing = Time.time + AttackCoolDownTime + 0.5f;
+                    NextSwordSwing = Time.time + AttackCoolDownTime;
                     WeaponInHand.GetComponent<WeaponDamageProjectiles>().switchCondition = switchCondition;
                     WeaponInHand.GetComponent<WeaponDamageProjectiles>().SetTag((PlayerNumber == 1) ? "Player" : "Player2");
                     WeaponInHand.GetComponent<WeaponDamageProjectiles>().Attack();
