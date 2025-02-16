@@ -1257,7 +1257,7 @@ GameObject:
   - component: {fileID: 6652529436592787068}
   - component: {fileID: 458289716083442137}
   - component: {fileID: -8238589130418075751}
-  - component: {fileID: 6534740101416541697}
+  - component: {fileID: 7947282625902399529}
   m_Layer: 0
   m_Name: Mathematician
   m_TagString: Player
@@ -1489,7 +1489,7 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 6796121518194019630, guid: 1eca24cd5e83d444c9cd1894c0f15970, type: 3}
---- !u!114 &6534740101416541697
+--- !u!114 &7947282625902399529
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -28,4 +28,5 @@ namespace StarterAssets
         public bool cursorLocked = true;
         public bool cursorInputForLook = true;
     }
+
 }

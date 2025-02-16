@@ -275,7 +275,7 @@ namespace StarterAssets
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
 
-            _input = GetComponent<InputController>();
+            _input = GetComponent<PlayerInputActions>();
 #if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
 #else
@@ -303,7 +303,7 @@ namespace StarterAssets
                 DisableInput();
                 opp.DisableInput();
                 Move();
-            } else if (Crouch())
+            } else if (Crouch()) // Everything that is allowed while crouching
             {
                 _input.jump = false;
                 _input.punch = false;
@@ -345,11 +345,6 @@ namespace StarterAssets
                         WeaponInHand.GetComponent<WeaponDamageHandler>().Attack();
                     }
 
-                    /*if (HandWeaponEquip)
-                    {
-                        _input.equipWeapon = false;
-                    }*/
-
                     // Equip/Unequip Main Weapon - No movement/jumping/attacks while using hand weapon
                     if (!HandWeaponEquip)
                     {
@@ -361,7 +356,14 @@ namespace StarterAssets
                             if (!WeaponEquip) {
                                 EquipHandWeapon();
                             }
-                            if (WeaponEquip)
+                            bool weaponAttackAnimationActive = _animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("Aiming Hand Weapon") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack1") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack2") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack3") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttackHW") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttackH");
+                            if (WeaponEquip || weaponAttackAnimationActive)
                             {
                                 WeaponP();
                                 WeaponK();
@@ -378,7 +380,6 @@ namespace StarterAssets
                                 Jab(); // North
                                 Hit(); // South
                             }
-                            Block();
                         } else
                         {
                             _input.punch = false;
@@ -399,9 +400,22 @@ namespace StarterAssets
                     _input.hit = false;
                     _input.equipHandWeapon = false;
 
-                    if (NextAttackTime - 0.2f < Time.time
-                        && NextHandWeaponTime - 2.5f < Time.time
-                        && NextSwordSwing < Time.time - 0.1f)
+                    // Only move if an attack animation or bloacking is not active
+                    bool attackAnimationNotActive = !_animator.GetCurrentAnimatorStateInfo(0).IsName("Punching") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("Mma Kick") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("Jab") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("Hit") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("Stun") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("Aiming Hand Weapon") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack1") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack2") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack3") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttackHW") &&
+                        !_animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttackH");
+
+
+                    if (attackAnimationNotActive && !Block())
                     {
                         Move();
                     }
@@ -414,7 +428,6 @@ namespace StarterAssets
                     _input.hit = false;
                     _input.kick = false;
                     _input.smo = false;
-                    EquipWeapon();
                 }
             }
             else
@@ -982,6 +995,13 @@ namespace StarterAssets
         }
         private void EquipWeapon()
         {
+            bool weaponAttackAnimationActive = _animator.GetCurrentAnimatorStateInfo(0).IsName("SpecialMoveOne") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("Aiming Hand Weapon") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack1") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack2") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttack3") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttackHW") ||
+                                _animator.GetCurrentAnimatorStateInfo(0).IsName("WeaponAttackH");
             if (_input.equipWeapon != WeaponEquip && _input.equipWeapon && !HandWeaponEquip && NextSwordSwing < Time.time) // Pull out weapon 
             {
                 WeaponEquip = true;
@@ -990,7 +1010,7 @@ namespace StarterAssets
                 _animator.SetBool(_animIDWeapon, WeaponEquip);
                 WeaponInHand.tag = (PlayerNumber == 1) ? "Player" : "Player2";
             }
-            else if (_input.equipWeapon != WeaponEquip && !_input.equipWeapon && NextSwordSwing < Time.time) // Put weapon away
+            else if (!weaponAttackAnimationActive && _input.equipWeapon != WeaponEquip && !_input.equipWeapon && NextSwordSwing < Time.time) // Put weapon away
             {
                 WeaponEquip = false;
                 Destroy(WeaponInHand);
