@@ -1258,7 +1258,7 @@ GameObject:
   - component: {fileID: 458289716083442137}
   - component: {fileID: -8238589130418075751}
   - component: {fileID: 7947282625902399529}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Mathematician
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -1311,7 +1311,7 @@ Animator:
   m_GameObject: {fileID: 4263846769095155863}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 1eca24cd5e83d444c9cd1894c0f15970, type: 3}
-  m_Controller: {fileID: 9100000, guid: b89124b6a59adbf468b66d390b9f810e, type: 2}
+  m_Controller: {fileID: 9100000, guid: 231d6fbf563c2c9448ba1bdab8cef246, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1341,8 +1341,8 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 1.7
-  m_Radius: 0.5
+  m_Height: 1.8
+  m_Radius: 0.15
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
@@ -1484,7 +1484,7 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30

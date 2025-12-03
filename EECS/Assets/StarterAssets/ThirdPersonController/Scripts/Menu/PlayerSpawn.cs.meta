@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d528d8d71443f9744895e6021bd1da43
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - MainMenuEvent: {fileID: 4671747492547984119, guid: 92e08d64578fa1d46aedaea6783910bb, type: 3}
+  - PlayerSelectEvent: {fileID: 7055491167081280764, guid: f1969239638f2c84885746fd268e6e6c, type: 3}
+  - Round: {instanceID: 0}
+  - _mainCamera: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
