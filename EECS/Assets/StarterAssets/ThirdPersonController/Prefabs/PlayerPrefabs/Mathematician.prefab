@@ -660,6 +660,11 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -681,6 +686,7 @@ SkinnedMeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -1257,7 +1263,7 @@ GameObject:
   - component: {fileID: 6652529436592787068}
   - component: {fileID: 458289716083442137}
   - component: {fileID: -8238589130418075751}
-  - component: {fileID: 7947282625902399529}
+  - component: {fileID: 82019810499453767}
   m_Layer: 8
   m_Name: Mathematician
   m_TagString: Player
@@ -1303,7 +1309,7 @@ MonoBehaviour:
   strength: 1.1
 --- !u!95 &3855317091090797080
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1317,6 +1323,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -1337,7 +1344,6 @@ CharacterController:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -1361,7 +1367,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Actions: {fileID: -944628639613478452, guid: e84b83b3d2980cc4b8aa54cd5cfe48cc, type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 2
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -1375,36 +1381,56 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 6bc1aaf4-b110-4ff7-891e-5b9fe6f32c4d
-    m_ActionName: Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow]
+    m_ActionId: 36b3baf0-d7ab-4f92-bad0-dfb0b6d1a1e7
+    m_ActionName: 'Player/Move[/Keyboard/a,/Keyboard/d]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 2690c379-f54d-45be-a724-414123833eb4
-    m_ActionName: Player/Look[/Mouse/delta,/Touchscreen/delta,/Pen/delta]
+    m_ActionId: 945a8f56-de6e-45a8-8cd5-fbeef24e0dfb
+    m_ActionName: 'Player/Look[/Mouse/delta,/Touchscreen/delta]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 8c4abdf8-4099-493a-aa1a-129acec7c3df
-    m_ActionName: Player/Jump[/Keyboard/space,/Keyboard/j]
+    m_ActionId: 60c05c31-d64e-47d6-a11c-46cbf130d1e5
+    m_ActionName: 'Player/Jump[/Keyboard/w]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 980e881e-182c-404c-8cbf-3d09fdb48fef
-    m_ActionName: Player/Sprint[/Keyboard/leftShift,/Keyboard/rightShift]
+    m_ActionId: 0aba5cdf-dc99-4ea4-b880-fb4e193297cf
+    m_ActionName: 'Player/Sprint[/Keyboard/leftShift,/Keyboard/rightShift]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: d450645f-49cd-4203-91dc-d504719dec10
-    m_ActionName: Player2/Sprint[/Keyboard/leftShift,/Keyboard/rightShift]
+    m_ActionId: 4db11bb5-f259-4cac-94f1-ba5678284824
+    m_ActionName: 'Player/Punch[/Keyboard/p,/Keyboard/o]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 7f21a3f0-f737-46d5-8c8d-0eb1eabfdc1e
-    m_ActionName: Player2/Jump[/Keyboard/space,/Keyboard/j]
+    m_ActionId: c1100afe-70b0-454a-bfd2-44525c70d223
+    m_ActionName: 'Player/Kick[/Keyboard/k,/Keyboard/l]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 71d00364-6d6c-4782-adc8-2d34a7921076
-    m_ActionName: Player2/Look[/Mouse/delta,/Touchscreen/delta,/Pen/delta]
+    m_ActionId: 6bd00c3f-eeb7-4950-81e9-4e54d33bd87c
+    m_ActionName: 'Player/Weapon[/Keyboard/i,/Keyboard/v]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 2bed1656-67e5-4a60-a900-46e209dc217b
-    m_ActionName: Player2/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow]
+    m_ActionId: 5fd3793a-92c0-4b41-a855-cda2eb72db34
+    m_ActionName: 'Player/HandWeapon[/Keyboard/h]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 20b3788f-265d-4840-83c4-fd2af16ef236
+    m_ActionName: 'Player/Crouch[/Keyboard/s]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 72360d09-2939-4ba0-8cfa-d3e3601dcc82
+    m_ActionName: 'Player/SpecialMoveOne[/Keyboard/u]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 709fa4b7-a5f4-4299-92ea-209236bd4a1c
+    m_ActionName: 'Player/Blocking[/Keyboard/b]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a6675715-f5a2-4707-a195-87a30649a1d2
+    m_ActionName: 'Player/Jab[/Keyboard/j]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 4a8a0e59-a323-4269-a12c-c6daaecfdbe8
+    m_ActionName: 'Player/Hit[/Keyboard/l]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: Player
@@ -1489,7 +1515,7 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 6796121518194019630, guid: 1eca24cd5e83d444c9cd1894c0f15970, type: 3}
---- !u!114 &7947282625902399529
+--- !u!114 &82019810499453767
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1498,9 +1524,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 4263846769095155863}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0034b8286c6545c4eaf4c0ae6580b59b, type: 3}
+  m_Script: {fileID: 11500000, guid: d78031cea91b9f444baf294fc0117a16, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::StarterAssets.InputController
   move: {x: 0, y: 0}
   look: {x: 0, y: 0}
   jump: 0
@@ -2234,6 +2260,11 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2255,6 +2286,7 @@ SkinnedMeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -2842,6 +2874,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2863,6 +2900,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0

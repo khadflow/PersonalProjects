@@ -189,6 +189,7 @@ namespace StarterAssets
         /* Jump Management */
         private bool backwardJump;
         private bool forwardJump;
+        // Required private variables for the Momentum Lock
 
         /* EE */
         [SerializeField] GameObject Clk;
@@ -268,7 +269,7 @@ namespace StarterAssets
         private void Start()
         {
             _animator = GetComponent<Animator>();
-            attackTrie = new AttackTrie(Gamepad.current.buttonSouth, _animator);
+            attackTrie = new AttackTrie(_animator);
             health = MaxHealth;
             _degrees = (NumPlayers == 0 ? FirstPlayerDegrees : SecondPlayerDegrees);
             transform.rotation = Quaternion.Euler(0.0f, _degrees, 0.0f);
@@ -283,7 +284,7 @@ namespace StarterAssets
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
 
-            _input = GetComponent<PlayerInputActions>();
+            _input = GetComponent<InputController>();
 #if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
 #else
@@ -681,7 +682,7 @@ namespace StarterAssets
                 Debug.Log("Grounded");
                 // Reset the fall timeout timer
                 _fallTimeoutDelta = FallTimeout;
-
+                
                 // Stop our velocity dropping infinitely when grounded
                 if (_verticalVelocity < 0.0f)
                 {

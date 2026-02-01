@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 using System.Linq;
 using Unity.VisualScripting;
 using System.Threading;
+using System;
 
 namespace StarterAssets
 {
@@ -19,29 +20,30 @@ namespace StarterAssets
     public class Attack
     {
         private Animator _animator;
-        public ButtonControl _button;
-        public string _value;
-
+        public string _moveName;
         public bool _visited = false;
         // Dictionary linking a specific button press to the next Attack in the chain.
-        public Dictionary<ButtonControl, Attack> _nextMoves; // Button -> Attack Object
-        private float _timing = 1.0f; // always 1 second for now
+        public Dictionary<string, Attack> _nextMoves; // Button -> Attack Object
 
-        public Attack(ButtonControl button, Animator animator, string value)
+        public Attack(Animator animator, string moveName)
         {
-            _button = button;
             _animator = animator;
-            _nextMoves = new Dictionary<ButtonControl, Attack>();
-            _value = value;
+            _nextMoves = new Dictionary<string, Attack>();
+            _moveName = moveName;
+        }
+
+        public Dictionary<string, Attack> GetMoves()
+        {
+            return _nextMoves;
         }
 
         /// <summary>
         /// Adds a new move (Attack node) as a child of the current move, extending the combo chain.
         /// </summary>
-        public Attack AddMove(ButtonControl button, string value)
+        public Attack AddMove(string value)
         {
-            Attack newAttack = new Attack(button, _animator, value);
-            _nextMoves.Add(button, newAttack);
+            Attack newAttack = new Attack(_animator, value);
+            _nextMoves.Add(value, newAttack);
             return newAttack;
         }
 
@@ -49,10 +51,13 @@ namespace StarterAssets
         /// Executes the animation associated with this attack.
         /// This is called when the attack is dequeued for playback.
         /// </summary>
-        public void Play(string val)
+        public void Play()
         {
-            Debug.Log("Play animation");
-            _animator.CrossFade(val, 0.05f);
+            if (string.IsNullOrEmpty(_moveName)) return;
+
+            Debug.Log($"Playing Animation: {_moveName}");
+            // Use CrossFade for smooth blending between combo hits
+            _animator.CrossFadeInFixedTime(_moveName, 0.1f);
         }
 
         /// <summary>
@@ -65,15 +70,12 @@ namespace StarterAssets
             if (_nextMoves.Count == 0)
             {
                 // Add the current attack's value if it hasn't been added yet (for the head nodes)
-                if (!currentPath.Contains(_value))
-                {
-                    currentPath.Add(_value);
-                }
+                
                 Debug.Log("Combo Path: " + string.Join(" -> ", currentPath));
             }
 
             // Recursive Case: Traverse all next moves
-            foreach (KeyValuePair<ButtonControl, Attack> pair in _nextMoves)
+            foreach (KeyValuePair<string, Attack> pair in _nextMoves)
             {
                 Attack nextAttack = pair.Value;
 
@@ -81,10 +83,7 @@ namespace StarterAssets
                 List<string> nextPath = new List<string>(currentPath);
 
                 // Add the current attack's value to the path before moving to the next node
-                if (!nextPath.Contains(_value))
-                {
-                    nextPath.Add(_value);
-                }
+                nextPath.Add(pair.Key);
 
                 // Recursively call the next attack in the chain
                 nextAttack.PrintCombos(nextPath);
@@ -99,7 +98,7 @@ namespace StarterAssets
     public class AttackTrie
     {
         // Stores all valid starting moves for a combo (the root nodes of the trie).
-        public Dictionary<ButtonControl, Attack> _head;
+        public Attack _head;
         // Pointer to the current position in the combo chain. Null when no combo is active.
         public Attack _pointer;
         private Animator _animator;
@@ -110,56 +109,29 @@ namespace StarterAssets
         // Queue to buffer attacks that are input faster than the animation can play.
         private Queue<Attack> _attackQueue;
         public bool _acceptingInput = true;
+        private float _lastInputTime;
 
-        public AttackTrie(ButtonControl button, Animator animator)
+        public AttackTrie(Animator animator)
         {
             _animator = animator;
             _pointer = null;
             _attackQueue = new Queue<Attack>();
 
             // Initialize all possible starting moves (root of the trie)
-            _head = new Dictionary<ButtonControl, Attack>();
-            _head.Add(Gamepad.current.buttonNorth, new Attack(Gamepad.current.buttonNorth, _animator, "Jab"));
-            _head.Add(Gamepad.current.buttonSouth, new Attack(Gamepad.current.buttonSouth, _animator, "Hit"));
-            _head.Add(Gamepad.current.buttonEast, new Attack(Gamepad.current.buttonEast, _animator, "Kick"));
-            _head.Add(Gamepad.current.buttonWest, new Attack(Gamepad.current.buttonWest, _animator, "Punch"));
+            _head = new Attack(_animator, "");
+            _head.AddMove("Jab");
+            _head.AddMove("Hit");
+            _head.AddMove("Kick");
+            _head.AddMove("Punch");
 
             // TODO
-            _head.Add(Gamepad.current.leftTrigger, new Attack(Gamepad.current.leftTrigger, _animator, "Heavy"));
+            //_head.Add(Gamepad.current.leftTrigger, new Attack(Gamepad.current.leftTrigger, _animator, "Heavy"));
             //_head.Add(Gamepad.current.rightTrigger, new Attack(Gamepad.current.rightTrigger, _animator, ""));
-            _head.Add(Gamepad.current.leftShoulder, new Attack(Gamepad.current.leftShoulder, _animator, "360 Swing"));
-            _head.Add(Gamepad.current.rightShoulder, new Attack(Gamepad.current.rightShoulder, _animator, "Aim"));
+            //_head.Add(Gamepad.current.leftShoulder, new Attack(Gamepad.current.leftShoulder, _animator, "360 Swing"));
+            //_head.Add(Gamepad.current.rightShoulder, new Attack(Gamepad.current.rightShoulder, _animator, "Aim"));
 
-            // Example combo sequence: South (Hit) -> East (Kick) -> North (Jab)
-            ButtonControl[] ABYCombo = {
-                Gamepad.current.buttonSouth,
-                Gamepad.current.buttonEast,
-                Gamepad.current.buttonNorth
-            };
-
-            // Example combo sequence: West (Punch) -> North (Jab) -> East (Kick)
-            ButtonControl[] XYBCombo = {
-                Gamepad.current.buttonWest,
-                Gamepad.current.buttonNorth,
-                Gamepad.current.buttonEast,
-            };
-
-            // Example combo sequence: South (Hit) -> North (Jab) -> South (Hit)
-            // Test Second combo path starting South
-            ButtonControl[] AYACombo = {
-                Gamepad.current.buttonSouth,
-                Gamepad.current.buttonNorth,
-                Gamepad.current.buttonSouth
-            };
-
-            // Add Combos to list
-            addMove(ABYCombo);
-            addMove(XYBCombo);
-            addMove(AYACombo);
-
-            ArrayList arr = new ArrayList();
-            PrintAllCombos(); // Utility to print all defined combos
-
+            //ArrayList arr = new ArrayList();
+            
             // Setup reverse mapping for quick lookup from string name to button
             _typeToButton = new Dictionary<string, ButtonControl>();
 
@@ -177,6 +149,80 @@ namespace StarterAssets
 
             // Note, right Trigger is Block
             //_typeToButton.Add("", Gamepad.current.rightTrigger);
+
+            // Example combo sequence: South (Hit) -> East (Kick) -> North (Jab)
+            string[] ABYCombo = {
+                "Hit",
+                "Kick",
+                "Jab"
+            };
+
+            // Example combo sequence: West (Punch) -> North (Jab) -> East (Kick)
+            string[] XYBCombo = {
+                "Punch",
+                "Jab",
+                "Kick",
+            };
+
+            // Example combo sequence: South (Hit) -> North (Jab) -> South (Hit)
+            // Test Second combo path starting South
+            string[] AYACombo = {
+                "Hit",
+                "Jab",
+                "Hit"
+            };
+
+            // Test Weapon Combo
+            string[] XYBACombo =
+            {
+                "Punch",
+                "Jab",
+                "Kick",
+                "Hit"
+            };
+
+            // Add Combos to list
+            addMove(ABYCombo);
+            addMove(XYBCombo);
+            addMove(AYACombo);
+            addMove(XYBACombo);
+
+            PrintAllCombos(); // Utility to print all defined combos
+        }
+
+        /// <summary>
+        /// Utility function to build a specific combo sequence by traversing and creating nodes.
+        /// </summary>
+        private void addMove(string[] newCombo)
+        {
+            if (newCombo == null || newCombo.Length == 0)
+            {
+                return;
+            }
+
+            // Start from the first button's root node
+            Attack _pointer;
+            _head.GetMoves().TryGetValue(newCombo[0], out _pointer);
+
+            if (_pointer == null)
+            {
+                _head.AddMove(newCombo[0]);
+                _pointer = _head.GetMoves()[newCombo[0]];
+            }
+
+            // Iteratively build out the combo chain by adding to the _nextMoves
+            for (int i = 1; i < newCombo.Length; i++)
+            {
+                // Add the next move to the list of the next position
+                string nextButton = newCombo[i];
+
+                // Does it exist there already? If so, continue. If not, add.
+                if (!_pointer.GetMoves().Keys.Contains(nextButton))
+                {
+                    _pointer.AddMove(nextButton);
+                }
+                _pointer.GetMoves().TryGetValue(nextButton, out _pointer);
+            }
         }
 
         /// <summary>
@@ -185,57 +231,26 @@ namespace StarterAssets
         /// </summary>
         public void Play(string move)
         {
-            // Anti-Mashing Check 1: If no combo is active (_pointer is null), block input
-            // if the queue is still busy playing a previous attack.
-            if (_pointer == null && _attackQueue.Count > 0)
+            _lastInputTime = Time.time;
+            // CASE A: Continuing a valid, pre-defined Combo Sequence
+            if (_pointer != null && _pointer.GetMoves().ContainsKey(move))
             {
-                Debug.Log("Input ignored: Queue is not empty and not in a combo.");
-                return;
-            }
-
-            // Check if we are currently in a combo chain.
-            if (_pointer != null)
-            {
-                // Check 2: SUCCESS PATH - Is the input the VALID NEXT MOVE in the current chain?
-                if (_pointer._nextMoves.ContainsKey(_typeToButton[move]))
-                {
-                    // Valid continuation: Advance the pointer and enqueue the move for playback.
-                    // This bypasses the queue check, enabling combo buffering.
-                    _pointer = _pointer._nextMoves[_typeToButton[move]];
-                    _attackQueue.Enqueue(_pointer);
-                }
-                else // Check 3: FAILURE PATH - Input was pressed, but it was NOT the correct next combo move.
-                {
-                    // Anti-Mashing Check 2: If the input was wrong AND the queue is busy, ignore it.
-                    // This prevents spamming random buttons while an animation is playing.
-                    if (_attackQueue.Count > 0)
-                    {
-                        Debug.Log("Input ignored: Queue is not empty.");
-                        return;
-                    }
-
-                    // Input failed the combo sequence while the queue was free.
-                    // Clear the queue and reset the combo pointer.
-                    _attackQueue.Clear();
-                    _ComboReset = Time.time - 1.0f; // Force reset immediately
-                    ResetCombo();
-
-                    // Now, try to start a new combo with the failed input button.
-                    if (_head.ContainsKey(_typeToButton[move]))
-                    {
-                        _pointer = _head[_typeToButton[move]];
-                        Debug.Log("_pointer is " + _pointer._value + " (Restarted Combo)");
-                        _attackQueue.Enqueue(_pointer);
-                    }
-                }
-            }
-            // Check 4: START NEW COMBO - Is this button a valid start of ANY combo?
-            else if (_head.ContainsKey(_typeToButton[move]))
-            {
-                // Start a new combo: Set the pointer to the root node and enqueue the move.
-                _pointer = _head[_typeToButton[move]];
-                Debug.Log("_pointer is " + _pointer._value);
+                _pointer = _pointer.GetMoves()[move];
                 _attackQueue.Enqueue(_pointer);
+
+                // ADD JUICE: Tell the animator or player script this is a "Combo Hit"
+                _animator.SetTrigger("ComboLink");
+                Debug.Log("<color=green>VALID COMBO LINKED!</color>");
+            }
+            // CASE B: Starting a fresh move (General Move)
+            else if (_head.GetMoves().ContainsKey(move))
+            {
+                if (_attackQueue.Count == 0)
+                {
+                    _pointer = _head.GetMoves()[move];
+                    _attackQueue.Enqueue(_pointer);
+                    Debug.Log("General Move Started.");
+                }
             }
         }
 
@@ -245,49 +260,27 @@ namespace StarterAssets
         /// </summary>
         public void EmptyQueue(bool idle)
         {
-            // Execute the next attack if the queue is not empty and the character is idle.
-            while (_attackQueue.Count > 0 && idle)
+            if (_attackQueue.Count == 0) return;
+
+            AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+
+            // DYNAMIC THRESHOLD
+            // If the next move in the queue is a valid CONTINUATION of a combo,
+            // we let it play much earlier (0.5f = 50% through the current move).
+            // If it's just a random button press, we make them wait (0.85f).
+            float cancelThreshold = (_pointer != null) ? 0.5f : 0.85f;
+
+            bool animationReady = stateInfo.IsName("Idle") || stateInfo.normalizedTime > cancelThreshold;
+
+            if (animationReady && !_animator.IsInTransition(0))
             {
                 Attack nextAttack = _attackQueue.Dequeue();
-                nextAttack.Play(nextAttack._value);
-                Debug.Log("Empty Queue: " + nextAttack._value);
-                _ComboReset = Time.time + 2.5f; // Extend the combo window after execution
 
-                // If the executed move was the end of a sequence (leaf node in trie)
-                // AND the queue is now empty, reset the combo pointer immediately.
-                if (nextAttack._nextMoves.Count == 0 && _pointer != null && _attackQueue.Count == 0)
-                {
-                    _pointer = null;
-                    Debug.Log("Combo FINISHED! Pointer reset after animation.");
-                }
-                break; // Only execute one attack per frame to spread out animation playback
-            }
-        }
+                // VISUAL DIFFERENTIATION
+                // If we are in a combo, maybe speed up the animator slightly
+                _animator.speed = (_pointer != null) ? 1.2f : 1.0f;
 
-        /// <summary>
-        /// Utility function to build a specific combo sequence by traversing and creating nodes.
-        /// </summary>
-        private void addMove(ButtonControl[] newCombo)
-        {
-            if (newCombo == null || newCombo.Length == 0)
-            {
-                return;
-            }
-
-            // Start from the first button's root node
-            Attack _pointer = _head[newCombo[0]];
-            for (int i = 1; i < newCombo.Length; i++)
-            {
-                // If the next move already exists in the tree, just move the pointer
-                if (_pointer._nextMoves.ContainsKey(newCombo[i]))
-                {
-                    _pointer = _pointer._nextMoves[newCombo[i]];
-                }
-                else // If the next move doesn't exist, create and add the new node
-                {
-                    // Use the animation value from the root node corresponding to this button
-                    _pointer = _pointer.AddMove(newCombo[i], _head[newCombo[i]]._value);
-                }
+                nextAttack.Play();
             }
         }
 
@@ -302,10 +295,16 @@ namespace StarterAssets
         /// </summary>
         public void ResetCombo()
         {
-            if (_ComboReset < Time.time)
+            // Check if the silence duration has exceeded our limit (e.g., 1.2 seconds)
+            if (Time.time - _lastInputTime > 1.2f)
             {
-                // Reset the combo pointer to null, indicating no active combo chain.
-                _pointer = null;
+                if (_pointer != null || _attackQueue.Count > 0)
+                {
+                    Debug.Log("Combo Timed Out: Clearing Pointers and Queue.");
+
+                    _pointer = null;      // Reset the Write Pointer to the start of the Trie
+                    _attackQueue.Clear(); // Empty the Read Pointer so no more animations fire
+                }
             }
         }
 
@@ -314,21 +313,21 @@ namespace StarterAssets
         /// </summary>
         public void PrintAllCombos()
         {
-            Debug.Log("--- STARTING TRIE COMBO PATHS ---");
+            Debug.Log("<color=orange>--- STARTING TRIE COMBO PATHS ---</color>");
 
-            // Iterate over all possible starting moves
-            foreach (KeyValuePair<ButtonControl, Attack> pair in _head)
+            // _head is the root node. We need to look at its children (the starters).
+            foreach (KeyValuePair<string, Attack> pair in _head.GetMoves())
             {
                 Attack startAttack = pair.Value;
 
-                // Start the path list for the recursive function
-                List<string> initialPath = new List<string> { startAttack._value };
+                // Start the path list with the name of the starter move
+                List<string> initialPath = new List<string> { pair.Key };
 
-                // Start recursion from the root attack
+                // Start recursion from this starter
                 startAttack.PrintCombos(initialPath);
             }
 
-            Debug.Log("--- ENDING TRIE COMBO PATHS ---");
+            Debug.Log("<color=orange>--- ENDING TRIE COMBO PATHS ---</color>");
         }
     }
 
