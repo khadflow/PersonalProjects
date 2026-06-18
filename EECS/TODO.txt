@@ -121,3 +121,7 @@ Keyboard Controller Mapping
 NOTES
 // See Controller Mappings
 // https://docs.unity3d.com/Manual/ios-handle-game-controller-input.html#InputMapping
+
+Missing Features
+- Combos that include weapon use
+- No direction change during jump

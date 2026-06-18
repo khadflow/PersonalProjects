@@ -28,13 +28,6 @@ namespace StarterAssets
     {
         /* Shared */
         [Header("Player")]
-        [Tooltip("Move speed of the character in m/s")]
-        // REMOVE
-        public float MoveSpeed = 2.5f;
-
-        [Tooltip("Sprint speed of the character in m/s")]
-        // REMOVE
-        public float SprintSpeed = 5.335f;
 
         [Tooltip("How fast the character turns to face movement direction")]
         [Range(0.0f, 0.3f)]
@@ -160,7 +153,7 @@ namespace StarterAssets
         private bool JabStarted;
         private bool HitStarted;
         private bool AttackMadeContact;
-        private float MoveCap = 2.7f;
+        private float MoveCap;
 
         /* Player Management */
         public AttackTrie attackTrie;
@@ -181,7 +174,7 @@ namespace StarterAssets
         private float NextJumpTime;
         private float JumpCoolDownTime = 1.3f;
         private float NextAttackTime;
-        private float AttackCoolDownTime = 1.4f;
+        private float AttackCoolDownTime = 1.0f;
         private float NextHandWeaponTime;
         private float HandWeaponTimeOut = 5.0f;
         private float NextSMOAttackTime;
@@ -236,6 +229,7 @@ namespace StarterAssets
         /* Script Handling */
         private void Awake()
         {
+            MoveCap = 4.0f;
             StunEndTime = Time.time - 1.0f;
             NextAttackTime = Time.time - 1.0f;
             NextJumpTime = Time.time - 1.0f;
@@ -303,6 +297,7 @@ namespace StarterAssets
         }
         private void Update()
         {
+            Orientation();
             _hasAnimator = TryGetComponent(out _animator);
             GroundedCheck();
             RoundResetCheck();
@@ -312,7 +307,8 @@ namespace StarterAssets
                 DisableInput();
                 opp.DisableInput();
                 Move();
-            } else
+            }
+            else
             {
                 bool isIdle = _animator.GetCurrentAnimatorStateInfo(0).IsName("Idle");
                 attackTrie.ResetCombo();
@@ -320,16 +316,35 @@ namespace StarterAssets
 
                 if (!Block())
                 {
-                    // Next: Cancel movement when Attack is called
-                    Punch();
-                    Kick();
-                    Jab();
-                    Hit();
+                    // No Attacks while in the air.
+                    if (Grounded)
+                    {
+                        // Next: Cancel movement when Attack is called
+                        Punch();
+                        Kick();
+                        Jab();
+                        Hit();
 
-                    // TODO - Add functions for 1 trigger and 2 bumper buttons
-                    Aim();
-                    Swing();
-                    Heavy();
+                        // TODO - Add functions for 1 trigger and 2 bumper buttons
+                        Aim();
+                        Swing();
+                        Heavy();
+                    } else
+                    {
+                        DisableInput();
+                    }
+
+                    // After testing the player input for an attack, we claim the cooldown if the attack is a singleton or an invalid combo.
+                    // For valid combos, we ignore the cooldown until it's complete. AttackTrie _pointer is reset.
+                    if (getNextAttackTime() <= Time.time)
+                    {
+                        attackTrie.ResetComboTreePointer();
+                        attackTrie.SetNotCooldown(true);
+                    }
+                    else
+                    {
+                        attackTrie.SetNotCooldown(false);
+                    }
 
                     bool isCrouchingActive = Crouch();
 
@@ -346,7 +361,8 @@ namespace StarterAssets
                         // 2. Allow Movement: Call Move()
                         Move();
                     }
-                } else
+                }
+                else
                 {
                     DisableInput();
                 }
@@ -359,11 +375,9 @@ namespace StarterAssets
             if (Timer < Time.time)
             {
                 _animator.SetBool(_animIDAttackCoolDown,
-                                 (Time.time < NextAttackTime)
+                                 (Time.time < getNextAttackTime())
                                  || (Time.time < NextSwordSwing));
                 _animator.SetBool(_animIDStun, false);
-
-                Orientation();
 
                 // Do not do while jumping
                 if (NextJumpTime < Time.time)
@@ -519,14 +533,14 @@ namespace StarterAssets
         /* Character Movement */
         private void Move()
         {
-            if (Time.time < NextAttackTime || _input.isBlocking)
+            if (Time.time < getNextAttackTime() || _input.isBlocking)
             {
                 _speed = 0.0f;
                 _animator.SetFloat(_animIDSpeed, 0.0f);
             }
 
             // set target speed based on move speed, sprint speed and if sprint is pressed
-            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+            float targetSpeed = MoveCap;
 
             // Current facing direction of the player
             float direction = (_degrees == FirstPlayerDegrees ? 1 : -1);
@@ -569,7 +583,7 @@ namespace StarterAssets
                 _speed = targetSpeed;
             }
             */
-            if (Time.time >= NextAttackTime)
+            if (Time.time >= getNextAttackTime())
             {
                 // a reference to the players current horizontal velocity
                 float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
@@ -595,7 +609,6 @@ namespace StarterAssets
                 }
             }
 
-            _speed = System.Math.Min(_speed, MoveCap);
             if (Time.time < NextJumpTime - 0.5f)
             {
                 _speed *= (0.9f);
@@ -742,7 +755,7 @@ namespace StarterAssets
         private void DisableInput()
         {
             // If the player is currently in the BLOCKING state, clear all action inputs
-            if (_input.isBlocking)
+            if (_input.isBlocking || !Grounded)
             {
                 // 1. Clear Jump and Jump Animations
                 _input.jump = false;
@@ -780,20 +793,24 @@ namespace StarterAssets
         }
         private void Orientation()
         {
-            bool oldSwitchCondition = switchCondition;
-            if (opp != null && PlayerNumber == 1 && opp.transform.position.x < transform.position.x && switchCondition)
+            if (Grounded)
             {
-                switchCondition = false; // Characters on the wrong side of each other
-            }
-            else if (PlayerNumber == 1 && opp != null && opp.transform.position.x > transform.position.x && !switchCondition)
-            {
-                switchCondition = true; // Characters on starting side of each other
-            }
+                bool oldSwitchCondition = switchCondition;
+                if (opp != null && PlayerNumber == 1 && opp.transform.position.x < transform.position.x && switchCondition)
+                {
+                    switchCondition = false; // Characters on the wrong side of each other
+                }
+                else if (PlayerNumber == 1 && opp != null && opp.transform.position.x > transform.position.x && !switchCondition)
+                {
+                    switchCondition = true; // Characters on starting side of each other
+                }
 
-            if (opp != null && oldSwitchCondition != switchCondition)
-            {
-                _degrees = (_degrees == FirstPlayerDegrees ? SecondPlayerDegrees : FirstPlayerDegrees);
-                opp._degrees = (opp._degrees == FirstPlayerDegrees ? SecondPlayerDegrees : FirstPlayerDegrees);
+                if (opp != null && oldSwitchCondition != switchCondition)
+                {
+                    _degrees = (_degrees == FirstPlayerDegrees ? SecondPlayerDegrees : FirstPlayerDegrees);
+                    opp._degrees = (opp._degrees == FirstPlayerDegrees ? SecondPlayerDegrees : FirstPlayerDegrees);
+                }
+                transform.rotation = Quaternion.Euler(0, _degrees, 0);
             }
         }
 
@@ -807,7 +824,6 @@ namespace StarterAssets
                 // Ensure the internal crouch state and animator are turned OFF
                 _input.crouch = false;
                 _animator.SetBool(_animIDCrouch, false);
-                MoveCap = 2.7f; // Reset to standard MoveCap
                 return false;
             }
 
@@ -821,7 +837,7 @@ namespace StarterAssets
 
             // 4. APPLY MOVEMENT MODIFIER
             // This is now safe because the Block check at the top handles the priority override.
-            MoveCap = _input.crouch ? 1.5f : 2.7f;
+            MoveCap = _input.crouch ? 2.5f : 4.0f;
 
             // Note: You must also ensure your attack functions prevent attacking while _input.crouch is true.
 
@@ -842,9 +858,11 @@ namespace StarterAssets
             if (_input.kick)
             {
                 Debug.Log("I pushed Kick");
-                attackTrie.Play("Kick");
+                if (attackTrie.Play("Kick"))
+                {
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                }
                 _input.kick = false;
-                NextAttackTime = Time.time + AttackCoolDownTime;
             }
         }
         private void Punch()
@@ -852,9 +870,11 @@ namespace StarterAssets
             if (_input.punch)
             {
                 Debug.Log("I pushed Punch");
-                attackTrie.Play("Punch");
+                if (attackTrie.Play("Punch"))
+                {
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                }
                 _input.punch = false;
-                NextAttackTime = Time.time + AttackCoolDownTime;
             }
         }
         private void Jab()
@@ -862,9 +882,11 @@ namespace StarterAssets
             if (_input.jab)
             {
                 Debug.Log("I pushed Jab");
-                attackTrie.Play("Jab");
+                if (attackTrie.Play("Jab"))
+                {
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                }
                 _input.jab = false;
-                NextAttackTime = Time.time + AttackCoolDownTime;
             }
         }
         private void Hit()
@@ -872,9 +894,11 @@ namespace StarterAssets
             if (_input.hit)
             {
                 Debug.Log("I pushed Hit");
-                attackTrie.Play("Hit");
+                if (attackTrie.Play("Hit"))
+                {
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                }
                 _input.hit = false;
-                NextAttackTime = Time.time + AttackCoolDownTime;
             }
         }
         private void Aim()
@@ -882,9 +906,11 @@ namespace StarterAssets
             if (_input.equipHandWeapon)
             {
                 Debug.Log("I pushed Aim");
-                attackTrie.Play("Aim");
+                if (attackTrie.Play("Aim"))
+                {
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                }
                 _input.equipHandWeapon = false;
-                NextAttackTime = Time.time + AttackCoolDownTime;
             }
         }
         private void Swing()
@@ -892,9 +918,11 @@ namespace StarterAssets
             if (_input.equipWeapon)
             {
                 Debug.Log("I pushed 360 Swing");
-                attackTrie.Play("360 Swing");
+                if (attackTrie.Play("360 Swing"))
+                {
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                }
                 _input.equipWeapon = false;
-                NextAttackTime = Time.time + AttackCoolDownTime;
             }
         }
         private void Heavy()
@@ -902,9 +930,11 @@ namespace StarterAssets
             if (_input.smo)
             {
                 Debug.Log("I pushed Heavy");
-                attackTrie.Play("Heavy");
+                if (attackTrie.Play("Heavy"))
+                {
+                    NextAttackTime = Time.time + AttackCoolDownTime;
+                }
                 _input.smo = false;
-                NextAttackTime = Time.time + AttackCoolDownTime;
             }
         }
 

@@ -110,6 +110,7 @@ namespace StarterAssets
         private Queue<Attack> _attackQueue;
         public bool _acceptingInput = true;
         private float _lastInputTime;
+        private bool _NotCoolingDown = true;
 
         public AttackTrie(Animator animator)
         {
@@ -191,6 +192,21 @@ namespace StarterAssets
         }
 
         /// <summary>
+        /// The pointer (_pointer) that validated combo moves should not be waiting too long
+        /// for the next move. It needs to be reset after the attack timeout and cancel the combo.
+        public void ResetComboTreePointer()
+        {
+            _pointer = null;
+        }
+
+        /// <summary>
+        /// During general moves, attacks need to adhere to the cooldown.
+        public void SetNotCooldown(bool notCooling)
+        {
+            _NotCoolingDown = notCooling;
+        }
+
+        /// <summary>
         /// Utility function to build a specific combo sequence by traversing and creating nodes.
         /// </summary>
         private void addMove(string[] newCombo)
@@ -228,8 +244,9 @@ namespace StarterAssets
         /// <summary>
         /// Processes a new player input ('move') to determine if it continues a combo, 
         /// starts a new one, or should be ignored.
+        /// Boolean returned if a move was successfully added to the queue
         /// </summary>
-        public void Play(string move)
+        public bool Play(string move)
         {
             _lastInputTime = Time.time;
             // CASE A: Continuing a valid, pre-defined Combo Sequence
@@ -241,17 +258,20 @@ namespace StarterAssets
                 // ADD JUICE: Tell the animator or player script this is a "Combo Hit"
                 _animator.SetTrigger("ComboLink");
                 Debug.Log("<color=green>VALID COMBO LINKED!</color>");
+                return true;
             }
             // CASE B: Starting a fresh move (General Move)
-            else if (_head.GetMoves().ContainsKey(move))
+            else if (_head.GetMoves().ContainsKey(move) && _NotCoolingDown)
             {
                 if (_attackQueue.Count == 0)
                 {
                     _pointer = _head.GetMoves()[move];
                     _attackQueue.Enqueue(_pointer);
                     Debug.Log("General Move Started.");
+                    return true;
                 }
             }
+            return false;
         }
 
         /// <summary>
@@ -295,8 +315,8 @@ namespace StarterAssets
         /// </summary>
         public void ResetCombo()
         {
-            // Check if the silence duration has exceeded our limit (e.g., 1.2 seconds)
-            if (Time.time - _lastInputTime > 1.2f)
+            // Check if the silence duration has exceeded our limit (e.g., 1.1 seconds)
+            if (Time.time - _lastInputTime > 1.1f)
             {
                 if (_pointer != null || _attackQueue.Count > 0)
                 {
