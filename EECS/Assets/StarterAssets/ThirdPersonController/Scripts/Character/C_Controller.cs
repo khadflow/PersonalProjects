@@ -143,9 +143,13 @@ namespace StarterAssets
         private GameObject WeaponInSheath;
         private GameObject WeaponInHand;
 
-
         private bool WeaponEquip = false;
         private bool HandWeaponEquip = false;
+
+        /* Movement Management */
+        private Vector3 _slideVelocity;
+        private bool _wasAttackingLastFrame = false;
+        [SerializeField] private float _attackFriction = 2.0f; // Higher values mean a shorter, faster stop
 
         /* Shared Melee Attack */
         private bool KickStarted;
@@ -263,6 +267,8 @@ namespace StarterAssets
         private void Start()
         {
             _animator = GetComponent<Animator>();
+
+            // TODO: Collider for right fist, left fist, left foot, right foot, left arm, left leg. Is there an easier way to get them using GetComponent
             attackTrie = new AttackTrie(_animator);
             health = MaxHealth;
             _degrees = (NumPlayers == 0 ? FirstPlayerDegrees : SecondPlayerDegrees);
@@ -390,6 +396,27 @@ namespace StarterAssets
                 //ClkAttackTrajectory();
 
                 //CircuitProjectileAttack();
+            }
+
+            // Deactivate an active collider if no contact has been made.
+            if (attackTrie.GetRightFistTimeout() <= Time.time)
+            {
+                attackTrie.DeactivateRightFist();
+            }
+
+            if (attackTrie.GetRightLegTimeout() <= Time.time)
+            {
+                attackTrie.DeactivateRightLeg();
+            }
+
+            if (attackTrie.GetLeftFistTimeout() <= Time.time)
+            {
+                attackTrie.DeactivateLeftFist();
+            }
+
+            if (attackTrie.GetLeftLegTimeout() <= Time.time)
+            {
+                attackTrie.DeactivateLeftLeg();
             }
         }
 
@@ -533,11 +560,54 @@ namespace StarterAssets
         /* Character Movement */
         private void Move()
         {
-            if (Time.time < getNextAttackTime() || _input.isBlocking)
+            bool isCurrentlyAttacking = Time.time < getNextAttackTime();
+
+            if (isCurrentlyAttacking || _input.isBlocking)
             {
+                // --- NEW DYNAMIC SLIDE LOGIC ---
+                if (isCurrentlyAttacking && !_wasAttackingLastFrame)
+                {
+                    Vector3 currentMoveDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+
+                    if (_input.move != Vector2.zero)
+                    {
+                        // 1. Grab the horizontal speed right before we clamped it
+                        float entrySpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+
+                        // 2. Calculate the intensity ratio (Current Speed / Max Speed)
+                        // Use Mathf.Clamp01 to make sure it stays strictly between 0 and 1
+                        float slideIntensity = Mathf.Clamp01(entrySpeed / MoveCap);
+
+                        // 3. Scale the slide! If they were barely moving, slideIntensity is low. 
+                        // We also enforce a small minimum multiplier (e.g., 0.3f) so they don't completely freeze if crawling.
+                        slideIntensity = Mathf.Max(slideIntensity, 0.3f);
+
+                        _slideVelocity = currentMoveDirection.normalized * (MoveCap * slideIntensity);
+                        // Smooth linear decay (your comfortable braking system)
+                        _slideVelocity *= 0.6f;
+                    }
+                    else
+                    {
+                        // Standing still: Keep your clean, static micro-step forward
+                        float facingDir = (_degrees == FirstPlayerDegrees ? 1f : -1f);
+                        _slideVelocity = new Vector3(facingDir, 0f, 0f) * 3.5f;
+                        // Smooth linear decay (your comfortable braking system)
+                        _slideVelocity *= 0.03f;
+                    }
+                }
+
+
                 _speed = 0.0f;
                 _animator.SetFloat(_animIDSpeed, 0.0f);
             }
+            else
+            {
+                // Not attacking, clear out any leftover slide speed
+                _slideVelocity = Vector3.zero;
+            }
+
+            // Keep track of state changes for the next frame
+            _wasAttackingLastFrame = isCurrentlyAttacking;
 
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = MoveCap;
@@ -546,43 +616,14 @@ namespace StarterAssets
             float direction = (_degrees == FirstPlayerDegrees ? 1 : -1);
 
             /* Deal With Input while stunned */
-
             if (Time.time < StunEndTime)
             {
                 DisableInput();
             }
 
-            // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
-
-            // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is no input, set the target speed to 0
             if (_input.move == Vector2.zero) targetSpeed = 0.0f;
 
-            // TODO - No longer needed?
-            /*
-            // a reference to the players current horizontal velocity
-            float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
-
-            float speedOffset = 0.1f;
-            float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
-
-            // accelerate or decelerate to target speed
-            if (currentHorizontalSpeed < targetSpeed - speedOffset ||
-                currentHorizontalSpeed > targetSpeed + speedOffset)
-            {
-                // creates curved result rather than a linear one giving a more organic speed change
-                // note T in Lerp is clamped, so we don't need to clamp our speed
-                _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude,
-                    Time.deltaTime * SpeedChangeRate);
-
-                // round speed to 3 decimal places
-                _speed = Mathf.Round(_speed * 1000f) / 1000f;
-            }
-            else
-            {
-                _speed = targetSpeed;
-            }
-            */
             if (Time.time >= getNextAttackTime())
             {
                 // a reference to the players current horizontal velocity
@@ -595,12 +636,7 @@ namespace StarterAssets
                 if (currentHorizontalSpeed < targetSpeed - speedOffset ||
                     currentHorizontalSpeed > targetSpeed + speedOffset)
                 {
-                    // creates curved result rather than a linear one giving a more organic speed change
-                    // note T in Lerp is clamped, so we don't need to clamp our speed
-                    _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude,
-                        Time.deltaTime * SpeedChangeRate);
-
-                    // round speed to 3 decimal places
+                    _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * SpeedChangeRate);
                     _speed = Mathf.Round(_speed * 1000f) / 1000f;
                 }
                 else
@@ -619,14 +655,10 @@ namespace StarterAssets
             // normalise input direction
             Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
 
-            // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
-            // if there is a move input rotate player when the player is moving
             if (_input.move != Vector2.zero)
             {
-                _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
-                                  _mainCamera.transform.eulerAngles.y;
-                float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
-                    RotationSmoothTime);
+                _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
+                float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
 
                 // Fixed Character Facing Position
                 transform.rotation = Quaternion.Euler(0.0f, _degrees, 0.0f);
@@ -643,7 +675,6 @@ namespace StarterAssets
             KeyCode value;
             JumpControlScheme.TryGetValue(_playerInput.currentControlScheme, out value);
 
-            // Calculate jump direction flags based on input and player facing
             bool jump = Mathf.Abs(_playerInput.actions["Jump"].ReadValue<float>()) > 0.1f;
             bool stepBack = (direction == 1) ? (_input.move.x < 0.0f) : (_input.move.x > 0.0f);
             _animator.SetBool(_animIDStepBack, stepBack);
@@ -651,27 +682,47 @@ namespace StarterAssets
             forwardJump = !stepBack && jump;
             backwardJump = jump && !forwardJump;
 
-            // Only set jump animation flags if the cooldown is over (NextJumpTime < Time.time)
             if (NextJumpTime < Time.time)
             {
-                // Set the animator booleans directly. This is the fix for the flickering animation.
                 _animator.SetBool(_animIDBackwardJump, backwardJump);
                 _animator.SetBool(_animIDForwardJump, forwardJump);
-
-                // If you need the external movement.Jump() for other logic (like VFX/SFX),
-                // keep it, but it was likely causing the conflict. Using direct animator calls is usually better.
-                // movement.Jump(backwardJump, forwardJump); 
             }
             else
             {
-                // If we are in cooldown, ensure the animation flags are FALSE to stop flicker.
                 _animator.SetBool(_animIDBackwardJump, false);
                 _animator.SetBool(_animIDForwardJump, false);
             }
 
-            // Apply movement
-            _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
-                             new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+            // --- DYNAMIC LAYER MATRIX CROSSOVER SYSTEM ---
+            if (opp != null)
+            {
+                float opponentControllerTop = opp.transform.position.y + 1.45f;
+
+                if (transform.position.y > opp.transform.position.y + 0.3f)
+                {
+                    Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Player_Solid"), LayerMask.NameToLayer("Player_Solid"), true);
+                }
+                else
+                {
+                    Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Player_Solid"), LayerMask.NameToLayer("Player_Solid"), false);
+                }
+            }
+
+            // --- MODIFIED APPLY MOVEMENT SECTION ---
+            // If we are attacking, calculate final movement vector using the sliding momentum instead of input control speed.
+            Vector3 finalMovement;
+            if (isCurrentlyAttacking)
+            {
+                // Notice we multiply _slideVelocity by Time.deltaTime here, just like standard movement does
+                finalMovement = (_slideVelocity * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime;
+            }
+            else
+            {
+                finalMovement = targetDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime;
+            }
+
+            // Now both attack and normal movement vectors are completely scaled uniformly!
+            _controller.Move(finalMovement);
 
             // update animator if using character
             if (_hasAnimator && Timer < Time.time)
@@ -954,7 +1005,8 @@ namespace StarterAssets
                     health -= damage;
                     _animator.SetFloat(_animIDHealth, health);
                     _animator.SetBool(_animIDStun, true);
-                    StunEndTime = Time.time + AttackCoolDownTime + 0.1f;
+                    // TODO: Adjust/Reintroduce stun time
+                    //StunEndTime = Time.time + AttackCoolDownTime + 0.1f;
                 }
             }
 

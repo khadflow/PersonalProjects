@@ -1,0 +1,31 @@
+## 🛠️ HOW-TO: Adding Attack Colliders to Character Joints
+
+Follow these steps whenever you need to map a new attack animation to a physical skeletal joint on a character model:
+
+### 1. Hierarchy Setup (The Bone)
+
+* Locate the target bone in the character's skeletal hierarchy (e.g., `mixamorig:RightFoot`).
+* Create a **new empty GameObject** as a **direct, immediate child** of that specific bone.
+* Name the GameObject identically to your target move or joint convention (e.g., `AttackCollider`).
+
+### 2. Component Configuration
+
+On the new `AttackCollider` GameObject, add the following two components:
+
+* **Collider (Box or Sphere):**
+* Check **`Is Trigger = true`**.
+* Adjust the size and center offsets in the Scene View so it matches the striking area of the limb.
+
+
+* **`AttackColliderTrigger` Script:**
+* Attach your trigger handling script to this child object.
+
+
+
+### 3. State Management Registration
+
+* Open `AttackColliders.cs`.
+* Cache the joint bone using `FindBoneUniversal(animator.transform, "TargetBoneName")`.
+* Retrieve the collider cleanly using `GetColliderFromTriggerScript(targetBoneBone)`.
+* Wire up your Activation/Deactivation methods and update your `EmptyQueue()` execution block in `AttackTrie.cs` to ensure the collider cleanly switches on when the animation plays.
+* Handle the timeout in the C_Controller in LateUpdate() for missed attacks

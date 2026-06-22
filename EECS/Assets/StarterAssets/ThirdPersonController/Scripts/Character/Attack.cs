@@ -112,11 +112,13 @@ namespace StarterAssets
         private float _lastInputTime;
         private bool _NotCoolingDown = true;
 
+        private AttackColliders ACManager;
         public AttackTrie(Animator animator)
         {
             _animator = animator;
             _pointer = null;
             _attackQueue = new Queue<Attack>();
+            ACManager = new AttackColliders(_animator);
 
             // Initialize all possible starting moves (root of the trie)
             _head = new Attack(_animator, "");
@@ -173,20 +175,27 @@ namespace StarterAssets
                 "Hit"
             };
 
-            // Test Weapon Combo
-            string[] XYBACombo =
+            string[] XBCombo =
             {
                 "Punch",
-                "Jab",
-                "Kick",
-                "Hit"
+                "Kick"
             };
+
+            // TODO: Test Weapon Combo
+            //string[] XYBACombo =
+            //{
+            //    "Punch",
+            //    "Jab",
+            //    "Kick",
+            //    "Hit"
+            //};
 
             // Add Combos to list
             addMove(ABYCombo);
             addMove(XYBCombo);
             addMove(AYACombo);
-            addMove(XYBACombo);
+            //addMove(XYBACombo);
+            addMove(XBCombo);
 
             PrintAllCombos(); // Utility to print all defined combos
         }
@@ -301,12 +310,82 @@ namespace StarterAssets
                 _animator.speed = (_pointer != null) ? 1.2f : 1.0f;
 
                 nextAttack.Play();
+
+                // TODO: ADD this check for other attacks and deactivate punch when done. Also, run opp.TakeDamage in Trigger Script
+                // TODO: Animation names should correspond to joint name for easier access. Maybe a map?
+                if (nextAttack._moveName == "Punch")
+                {
+                    ACManager.ActivateRightFist();
+                }
+
+                if (nextAttack._moveName == "Kick")
+                {
+                    ACManager.ActivateRightLeg();
+                }
+
+                if (nextAttack._moveName == "Jab")
+                {
+                    ACManager.ActivateRightFist();
+                }
+
+                if (nextAttack._moveName == "Hit")
+                {
+                    ACManager.ActivateLeftFist();
+                }
             }
         }
 
         public bool isQueueEmpty()
         {
             return _attackQueue.Count == 0;
+        }
+
+        /// <summary>
+        /// Reset the active colliders if no contact is made
+        /// </summary>
+        
+        // Right Fist
+        public float GetRightFistTimeout()
+        {
+            return ACManager.GetRightFistTimeout();
+        }
+
+        public void DeactivateRightFist()
+        {
+            ACManager.DeactivateRightFist();
+        }
+
+        // Right Leg
+        public float GetRightLegTimeout()
+        {
+            return ACManager.GetRightLegTimeout();
+        }
+
+        public void DeactivateRightLeg()
+        {
+            ACManager.DeactivateRightLeg();
+        }
+
+        // Left Leg
+        public float GetLeftLegTimeout()
+        {
+            return ACManager.GetLeftLegTimeout();
+        }
+
+        public void DeactivateLeftLeg()
+        {
+            ACManager.DeactivateLeftLeg();
+        }
+
+        // Left Fist
+        public float GetLeftFistTimeout()
+        {
+            return ACManager.GetLeftFistTimeout();
+        }
+
+        public void DeactivateLeftFist()
+        {
+            ACManager.DeactivateLeftFist();
         }
 
         /// <summary>
