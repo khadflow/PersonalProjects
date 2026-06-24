@@ -6,14 +6,15 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using Unity.VisualScripting;
+using Cinemachine; // Enforce Cinemachine v2 namespace for compilation consistency
+
 namespace StarterAssets
 {
     public class PlayerSpawn : MonoBehaviour
-    {   
+    {
         /* UI Management */
         private bool ActiveGame;
         private Vector3 MenuPos;
-        private Vector3 HiddenPos;
         private Image image;
 
         public GameObject PlayerSelect; // For Player Select Reference
@@ -37,10 +38,14 @@ namespace StarterAssets
         private Vector3 P1StartLocation, P2StartLocation;
         public GameObject _mainCamera;
 
+        // NEW: Assign an empty GameObject located on your flat stage floor here via the Inspector
+        [Header("Stage Positioning")]
+        public Transform StageFloorAnchor;
+
         private GameObject Player;
         private GameObject Player2;
         private bool Players_Spawned;
-        
+
         void Start()
         {
             foreach (Button b in PlayerSelectButtons)
@@ -52,7 +57,7 @@ namespace StarterAssets
             Round.SetActive(false);
 
             // Menu Components
-            PlayerSelection = PlayerSelect.gameObject.GetComponent<PlayerSelect>();
+            PlayerSelection = PlayerSelect.gameObject.GetComponentInChildren<PlayerSelect>();
             image = GetComponent<Image>();
 
             // Default Players
@@ -64,7 +69,6 @@ namespace StarterAssets
             Players_Spawned = false;
             MenuPos = transform.position;
             PlayerSelection.SetMenuPos(MenuPos);
-            HiddenPos = new Vector3(_mainCamera.transform.position.x - 500, _mainCamera.transform.position.y - 500, _mainCamera.transform.position.z);
         }
 
         void Update()
@@ -73,23 +77,54 @@ namespace StarterAssets
             {
                 C_Controller.NumberOfPlayers = 0;
 
-                P1StartLocation = new Vector3(_mainCamera.transform.position.x - dist, _mainCamera.transform.position.y - 2, _mainCamera.transform.position.z + 20);
-                P2StartLocation = new Vector3(_mainCamera.transform.position.x + dist, _mainCamera.transform.position.y - 2, _mainCamera.transform.position.z + 20);
+                // Grab a safe fallback coordinate if the anchor field hasn't been set in the inspector yet
+                Vector3 referenceBase = StageFloorAnchor != null ? StageFloorAnchor.position : new Vector3(0f, 0f, 0f);
 
+                // Calculate horizontal offsets cleanly off the floor anchor instead of reading the floating sky camera
+                P1StartLocation = new Vector3(referenceBase.x - dist, referenceBase.y, referenceBase.z);
+                P2StartLocation = new Vector3(referenceBase.x + dist, referenceBase.y, referenceBase.z);
+
+                // Spawn characters cleanly onto the floor coordinates
                 P1 = Instantiate(Player, P1StartLocation, Quaternion.Euler(0.0f, 90.0f, 0.0f));
                 P2 = Instantiate(Player2, P2StartLocation, Quaternion.Euler(0.0f, 270.0f, 0.0f));
                 P1.tag = "Player";
                 P2.tag = "Player2";
 
+                // Register targets to your tracking group
+                if (CinemachineTargetGroupManager.Instance != null)
+                {
+                    CinemachineTargetGroupManager.Instance.AddPlayerToTargetGroup(P1.transform);
+                    CinemachineTargetGroupManager.Instance.AddPlayerToTargetGroup(P2.transform);
+                }
+
+                // Activate your virtual camera seamlessly now that players are safely localized on the field
+                CinemachineVirtualCamera vCam = GameObject.FindAnyObjectByType<CinemachineVirtualCamera>();
+                if (vCam != null)
+                {
+                    vCam.gameObject.SetActive(true);
+                    Debug.Log("[CAMERA] Cinemachine Virtual Camera successfully activated!");
+                }
+                else
+                {
+                    GameObject vCamObj = GameObject.Find("Virtual Camera");
+                    if (vCamObj != null)
+                    {
+                        vCamObj.SetActive(true);
+                        Debug.Log("[CAMERA] Virtual Camera found via name search and activated!");
+                    }
+                }
+
+                // Hide Main Menu
                 Players_Spawned = true;
-                this.transform.position = HiddenPos;
+                GameObject mainMenu = GameObject.Find("MainMenuCanvas");
+                mainMenu.SetActive(false);
             }
             if (ActiveGame)
             {
                 C_Controller player1_controller, player2_controller;
                 player1_controller = P1.gameObject.GetComponent<C_Controller>();
                 player2_controller = P2.gameObject.GetComponent<C_Controller>();
-                
+
                 if (C_Controller.Round > 2)
                 {
                     MenuTimer = Time.time + MenuCountdown;
@@ -97,13 +132,18 @@ namespace StarterAssets
                     C_Controller.ResetRound();
 
                     MainMenuEvent.gameObject.SetActive(true);
+
+                    // Hide Main Menu
+                    Players_Spawned = true;
+                    GameObject mainMenu = GameObject.Find("MainMenuCanvas");
+                    mainMenu.SetActive(true);
                 }
 
                 if (C_Controller.Round <= 2 && ActiveGame)
                 {
                     tmp.text = "Round " + C_Controller.Round.ToString();
                 }
-            } 
+            }
 
             if (!ActiveGame && Players_Spawned)
             {
@@ -137,6 +177,7 @@ namespace StarterAssets
             image.gameObject.SetActive(false);
         }
 
+        // TODO: Implement proper canvas-scale anchoring for health bars
         public void SetPlayerOne(GameObject P1)
         {
             Player = P1;
@@ -190,13 +231,11 @@ namespace StarterAssets
 
         public void EndGame()
         {
-            #if UNITY_EDITOR
-                        // Application.Quit() does not work in the editor so
-                        // UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
-                        UnityEditor.EditorApplication.isPlaying = false;
-            #else
-                    Application.Quit();
-            #endif
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+                        Application.Quit();
+#endif
         }
     }
 }

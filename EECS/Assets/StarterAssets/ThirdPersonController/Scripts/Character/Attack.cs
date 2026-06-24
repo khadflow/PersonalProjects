@@ -257,6 +257,12 @@ namespace StarterAssets
         /// </summary>
         public bool Play(string move)
         {
+            // TODO: Test with other player
+            if (move == "Stun")
+            {
+                _attackQueue.Clear();
+                _animator.CrossFadeInFixedTime("Stun", 0.1f);
+            }
             _lastInputTime = Time.time;
             // CASE A: Continuing a valid, pre-defined Combo Sequence
             if (_pointer != null && _pointer.GetMoves().ContainsKey(move))
@@ -343,7 +349,7 @@ namespace StarterAssets
         /// <summary>
         /// Reset the active colliders if no contact is made
         /// </summary>
-        
+
         // Right Fist
         public float GetRightFistTimeout()
         {

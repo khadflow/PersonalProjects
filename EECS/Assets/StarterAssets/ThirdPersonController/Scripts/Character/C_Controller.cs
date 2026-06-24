@@ -132,6 +132,7 @@ namespace StarterAssets
         private int _animIDAttackCoolDown;
         private int _animIDHealth;
         private int _animIDBlock;
+        private int _animIDDefeat;
 
         /* Shared Weapon Management */
         [SerializeField] GameObject Weapon;
@@ -424,15 +425,19 @@ namespace StarterAssets
         /* Round Management */
         public void RoundResetCheck()
         {
-            if (StunEndTime < Time.time && health <= 0.1f)
+            if (RoundCoolDown && Timer <= Time.time)
             {
                 health = MaxHealth;
                 opp.health = MaxHealth;
+
                 _animator.SetFloat(_animIDHealth, health);
                 opp._animator.SetFloat(opp._animIDHealth, opp.health);
 
+                _animator.SetBool(_animIDDefeat, false);
+                opp._animator.SetBool(opp._animIDDefeat, false);
+
+
                 RoundCoolDown = false;
-                SetTimer(RoundLoadTime * 2.0f);
 
                 // Reset Player Health
                 GameObject.FindGameObjectWithTag("PlayerOneHealth").GetComponent<PlayerHealth>().SetHealth(MaxHealth);
@@ -499,6 +504,7 @@ namespace StarterAssets
                 _degrees = value;
             }
         }
+
         public void HealthBarAssignment()
         {
             if (PlayerNumber == 1)
@@ -510,6 +516,7 @@ namespace StarterAssets
                 ph = Instantiate(p2);
             }
         }
+
         public void DestroyHealthBars()
         {
             if (PlayerNumber == 1)
@@ -542,6 +549,8 @@ namespace StarterAssets
             _animIDCrouch = Animator.StringToHash("Crouch");
             _animIDsmo = Animator.StringToHash("SMO");
             _animIDBlock = Animator.StringToHash("Block");
+
+            _animIDDefeat = Animator.StringToHash("Defeat");
 
             _animator.SetFloat(_animIDHealth, health);
             _animator.SetBool(_animIDStun, false);
@@ -992,28 +1001,25 @@ namespace StarterAssets
         /* Damage Handling */
         public void TakeDamage(float damage, bool smo)
         {
-            float oppX = opp.transform.position.x;
-            float X = transform.position.x;
-            if (System.Math.Abs(oppX - X) <= 1.5f || smo)
+            if (StunEndTime < Time.time
+                && !_input.crouch
+                && !_input.isBlocking)
             {
-                // The player can't take damage while already stunned
-                if (StunEndTime < Time.time
-                    && !_animator.GetCurrentAnimatorStateInfo(0).IsName("Stun")
-                    && !_input.crouch
-                    && !_input.isBlocking)
-                {
-                    health -= damage;
-                    _animator.SetFloat(_animIDHealth, health);
-                    _animator.SetBool(_animIDStun, true);
+                Stun();
+                health -= damage;
+                _animator.SetFloat(_animIDHealth, health);
+                _animator.SetBool(_animIDStun, true);
                     // TODO: Adjust/Reintroduce stun time
                     //StunEndTime = Time.time + AttackCoolDownTime + 0.1f;
-                }
             }
 
             if (health < 0.1f && !RoundCoolDown)
             {
                 Round++;
                 RoundCoolDown = true;
+                SetTimer(RoundLoadTime);
+                _animator.SetBool(_animIDDefeat, true);
+                _animator.SetBool(_animIDStun, false);
             }
             if (PlayerNumber == 2)
             {
@@ -1023,7 +1029,14 @@ namespace StarterAssets
             {
                 GameObject.FindGameObjectWithTag("PlayerOneHealth").GetComponent<PlayerHealth>().SetHealth(health);
             }
+        }
 
+        private void Stun()
+        {
+            if (attackTrie.Play("Stun"))
+            {
+                NextAttackTime = Time.time + AttackCoolDownTime;
+            }
         }
         public float getHealth()
         {
@@ -1036,6 +1049,11 @@ namespace StarterAssets
         public static float GetMaxHealth()
         {
             return MaxHealth;
+        }
+
+        public int GetPlayerNumber()
+        {
+            return PlayerNumber;
         }
 
         /* Starter Asset Functions - Start */
